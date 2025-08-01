@@ -29,12 +29,13 @@ export default class MagicLinkRepository {
     };
 
     static async getValid(id: string, token: string) {
+        console.log("ESTA LLEGANDO EL ID, TOKEN", id, token);
         const raw = await pool.query(
             magicLinkQueries.getValid,
             [id, token]
         );
 
-        if (raw.rowCount == 0) {
+        if (raw.rowCount === 0) {
             // TODO: QUITAR ESTO
             console.log("Mio y klk, aqui es que esta el error");
             throw new UnauthorizedError();

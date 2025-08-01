@@ -87,6 +87,11 @@ CREATE TABLE refresh_tokens (
   token TEXT NOT NULL UNIQUE,
   issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMP NOT NULL
+
+  CONSTRAINT fk_refresht_user
+      FOREIGN KEY (user_id)
+      REFERENCES usuarios(id)
+          ON DELETE CASCADE
 );
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
