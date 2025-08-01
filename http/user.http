@@ -1,0 +1,43 @@
+@api = http://localhost:5000/api/v1
+
+### POST REGISTER
+POST {{api}}/auth/signup/spm
+Content-Type: application/json
+
+{
+    "nombre": "Cesar Luis",
+    "apellido": "Rijo Cedano",
+    "cedula": "402-1085877-1",
+    "email": "cesarluisrc@gmail.com",
+    "password": "cesarluis2005"
+}
+
+### POST VERIFY
+POST {{api}}/auth/magic
+Content-Type: application/json
+
+{
+    "user_id": 5,
+    "email": "cesarluisrc@gmail.com"
+}
+
+### POST CONSUME MAGIC
+POST {{api}}/auth/magic/consume
+Content-Type: application/json
+
+### POST LOGIN
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+    "telefono": "8299688885",
+    "password": "cesarluis2005"
+}
+
+### LOAD
+POST {{api}}/auth/load 
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidGlwb191c3VhcmlvIjoiY2xpZW50ZSIsImlhdCI6MTc1MzI2OTk3MSwiZXhwIjoxNzUzMjcwODcxfQ.gprRNXAIXSqt8RZK1ossTScv67mRx-l7qPLWWn6ZLHQ
+
+### REFRESH
+POST {{api}}/auth/refresh
