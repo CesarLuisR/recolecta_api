@@ -55,6 +55,7 @@ export const magicLink: RequestHandler = async (req, res, next) => {
                 secure: config.ENV === "production", 
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 10 * 60 * 1000, // 10 mins
+                path: "/", 
             })
             .status(201)
             .json({ message: "Mensaje enviado correctamente" });
@@ -90,12 +91,14 @@ export const magicConsume: RequestHandler = async (req, res, next) => {
                 secure: config.ENV === "production", 
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                path: "/", 
             })
             .cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 15 * 60 * 1000, // 15mins
+                path: "/", 
             })
             .status(201)
             .json({ message: "Usuario logeado correctamente", user });
@@ -126,12 +129,14 @@ export const logIn: RequestHandler = async (req, res, next) => {
                 secure: config.ENV === "production", 
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                path: "/", 
             })
             .cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 15 * 60 * 1000, // 15mins
+                path: "/", 
             })
             .status(201)
             .json({ message: "Usuario logeado correctamente", user });
@@ -169,12 +174,14 @@ export const refreshToken: RequestHandler = async (req, res, next) => {
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                path: "/", 
             })
             .cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 15 * 60 * 1000, // 15mins
+                path: "/", 
             })
             .sendStatus(200);
     } catch(e) {
@@ -212,11 +219,13 @@ export const logOut: RequestHandler = async (req, res, next) => {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
+                path: "/", 
             })
             .clearCookie("accessToken", {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
+                path: "/", 
             })
             .sendStatus(204);
     } catch(e) {
