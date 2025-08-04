@@ -77,6 +77,7 @@ export const validateMagicLink: RequestHandler = async (req, res, next) => {
 export const getSessionId: RequestHandler = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
+        // TODO: El error puede estar aqui
         const session_id = await getSessionIdService(id);
 
         res

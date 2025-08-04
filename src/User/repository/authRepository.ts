@@ -52,8 +52,8 @@ export default class AuthRepository {
         );
 
         if (data.rowCount === 0)
-            throw new NotFoundError("Session no encontrado");
+            throw new NotFoundError("Este usuario esta creado y no necesita verificacion");
 
-        return data.rows[0];
+        return data.rows[0].session_id;
     }
 }
