@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { LogInData, SignUpData } from "../../types/auth";
 import { BadRequestError, ForbiddenError, UnauthorizedError } from "../../utils/error";
 import { validateCedulaService } from "../services/cedulaService";
-import { loginUserService, magicConsumeService, magicLinkService, registerUserService, verifyMagicLinkService } from "../services/authServices";
+import { getSessionIdService, loginUserService, magicConsumeService, magicLinkService, registerUserService, verifyMagicLinkService } from "../services/authServices";
 import config from "../../config";
 import { generateAccessToken, generateRefreshToken, TokenPayload, verifyAccessToken, verifyRefreshToken } from "../../utils/token";
 import TokenRepository from "../repository/tokenRepository";
@@ -14,7 +14,7 @@ export const signUp: RequestHandler = async (req, res, next) => {
         const data: SignUpData = req.body;
         const municipio_slug = req.params.municipio_slug;
 
-        if (!data.nombre|| !data.apellido|| !data.cedula || !data.email)
+        if (!data.nombre || !data.apellido || !data.cedula || !data.email)
             throw new BadRequestError("Se necesitan todos los datos");
 
         if (typeof data.cedula != "string" || data.cedula.length > 13)
@@ -74,9 +74,33 @@ export const validateMagicLink: RequestHandler = async (req, res, next) => {
     }
 }
 
+export const getSessionId: RequestHandler = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const session_id = await getSessionIdService(id);
+
+        res
+            .cookie("session_id", session_id, {
+                httpOnly: true,
+                secure: config.ENV === "production", 
+                sameSite: config.ENV === "production" ? "none" : "lax",
+                maxAge: 10 * 60 * 1000, // 10 mins
+                path: "/", 
+            })
+            .status(201)
+            .json({ message: "Session establecida correctamente" });
+    } catch(e) {
+        next(e);
+    }
+}
+
 export const magicConsume: RequestHandler = async (req, res, next) => {
     try {
         const token = req.cookies.session_id;
+
+        if (!token) 
+            throw new UnauthorizedError();
+
         const id = req.params.id;
         const user = await magicConsumeService(id, token);
 

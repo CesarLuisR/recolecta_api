@@ -11,36 +11,29 @@ export default class UserRepository {
     }
 
     static async getUserByEmail(email: string): Promise<User | null> {
-        try {
-            const data = await pool.query(
-                userQueries.getUserByEmail,
-                [email]
-            );
+        const data = await pool.query(
+            userQueries.getUserByEmail,
+            [email]
+        );
 
-            if (data.rowCount === 0)
-                return null;
+        if (data.rowCount === 0)
+            return null;
 
-            const user: User = data.rows[0];
-            return user;
-        } catch(e) {
-            throw e;
-        }
+        const user: User = data.rows[0];
+        return user;
     }
 
     static async getUserById(id: number): Promise<User> {
-        try {
-            const data = await pool.query(
-                userQueries.getUserById,
-                [id]
-            );
+        const data = await pool.query(
+            userQueries.getUserById,
+            [id]
+        );
 
-            if (data.rowCount === 0)
-                throw new NotFoundError("Usuario no encontrado");
+        if (data.rowCount === 0)
+            throw new NotFoundError("Usuario no encontrado");
 
-            const user: User = data.rows[0];
-            return user;
-        } catch(e) {
-            throw e;
-        }
+        const user: User = data.rows[0];
+        return user;
     }
+
 }

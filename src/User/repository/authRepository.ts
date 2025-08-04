@@ -44,4 +44,16 @@ export default class AuthRepository {
         const user: User = data.rows[0];
         return user;
     }
+
+    static async getUserSession(id: number): Promise<string> {
+        const data = await pool.query(
+            authQueries.getUserSession,
+            [id]
+        );
+
+        if (data.rowCount === 0)
+            throw new NotFoundError("Session no encontrado");
+
+        return data.rows[0];
+    }
 }

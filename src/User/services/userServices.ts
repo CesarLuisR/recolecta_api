@@ -2,10 +2,9 @@ import { User } from "../../types/user";
 import { NotFoundError } from "../../utils/error";
 import UserRepository from "../repository/userRepository";
 
-export const loginUserExistenceService = async (email: string): Promise<number> => {
+export const getUserService = async (email: string): Promise<User> => {
     const user = await UserRepository.getUserByEmail(email);
-    if (user)
-        return user.id;
+    if (user) return user;
 
     throw new NotFoundError("Usuario no encontrado");
 }

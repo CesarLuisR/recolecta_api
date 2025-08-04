@@ -34,9 +34,6 @@ export const magicLinkService = async (user_id: number): Promise<MagicLinkI> => 
 export const magicConsumeService = async (id: string, token: string): Promise<User> => {
     const data = await MagicLinkRepository.getValid(id, token);
 
-    if (data.used === true)
-        throw new Error("Magic link ya utilizado");
-
     await MagicLinkRepository.setUsed(id);
     const user = await AuthRepository.setUserStatus(data.user_id);
     return user;
@@ -53,7 +50,7 @@ export const verifyMagicLinkService = async (id: string): Promise<userExistenceI
     return { exists: true, verified: true };
 }
 
-// tofix: no se necesita password tampoco aqui 
+// TODO: no se necesita password tampoco aqui 
 export const loginUserService = async (data: LogInData): Promise<User> => {
     const user = await UserRepository.getUserByEmail(data.email);
     if (!user) 
@@ -63,4 +60,9 @@ export const loginUserService = async (data: LogInData): Promise<User> => {
     if (!validPassword) throw new UnauthorizedError("Credenciales invalidas");
 
     return user;
+}
+
+export const getSessionIdService = async (user_id: number): Promise<string> => {
+    const id = await AuthRepository.getUserSession(user_id);
+    return id;
 }

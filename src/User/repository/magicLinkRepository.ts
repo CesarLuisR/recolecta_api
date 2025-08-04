@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { pool } from "../../database";
 import * as magicLinkQueries from "./magicLinkModel";
-import { NotFoundError, UnauthorizedError } from "../../utils/error";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "../../utils/error";
 
 // Ya explique el por que del formato en el authModel
 export interface MagicLinkI {
@@ -29,17 +29,13 @@ export default class MagicLinkRepository {
     };
 
     static async getValid(id: string, token: string) {
-        console.log("ESTA LLEGANDO EL ID, TOKEN", id, token);
         const raw = await pool.query(
             magicLinkQueries.getValid,
             [id, token]
         );
 
-        if (raw.rowCount === 0) {
-            // TODO: QUITAR ESTO
-            console.log("Mio y klk, aqui es que esta el error");
-            throw new UnauthorizedError();
-        }
+        if (raw.rowCount === 0)
+            throw new ForbiddenError("Link expirado o ya validado");
 
         return raw.rows[0];
     }

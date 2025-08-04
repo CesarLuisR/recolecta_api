@@ -8,6 +8,7 @@ router.post("/signup/:municipio_slug", authCtrl.signUp);
 router.post("/magic", authCtrl.magicLink);
 router.get("/magic/validate/:id", authCtrl.validateMagicLink);
 router.post("/magic/consume/:id", authCtrl.magicConsume);
+router.get("/session/:id", authCtrl.getSessionId);
 
 router.post("/login", authCtrl.logIn);
 

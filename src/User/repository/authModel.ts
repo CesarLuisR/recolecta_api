@@ -17,7 +17,6 @@ export const createUser = `
         id, tipo_usuario;
 `;
 
-
 export const setUserStatus = `
     UPDATE usuarios
     SET verified = true
@@ -33,4 +32,12 @@ export const setUserStatus = `
         creado_en,
         municipio_id,
         verified;
+`;
+
+export const getUserSession = `
+    SELECT session_id
+    FROM magic_links
+    WHERE user_id = $1
+    ORDER BY created_at DESC
+    LIMIT 1
 `;

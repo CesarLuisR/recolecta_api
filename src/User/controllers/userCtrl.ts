@@ -1,6 +1,7 @@
-import { RequestHandler } from "express";
+import e, { RequestHandler } from "express";
 import { verifyAccessToken } from "../../utils/token";
-import { loadUserService, loginUserExistenceService } from "../services/userServices";
+import { loadUserService, getUserService } from "../services/userServices";
+import config from "../../config";
 
 export const load: RequestHandler = async (req, res, next) => {
     try {
@@ -13,12 +14,22 @@ export const load: RequestHandler = async (req, res, next) => {
     }
 }
 
-export const loginUserExistence: RequestHandler = async (req, res, next) => {
+export const getUser: RequestHandler = async (req, res, next) => {
     try {
         const { email } = req.body;
-        const id = await loginUserExistenceService(email);
-        res.status(200).json({ id: id });
+        const user = await getUserService(email);
+        res.status(200).json({ id: user.id });
     } catch(e: any) {
+        next(e);
+    }
+}
+
+export const noVerifiedUser: RequestHandler = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const user = await getUserService(email);
+        res.status(200).json({ user })
+    } catch(e) {
         next(e);
     }
 }
