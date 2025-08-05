@@ -57,3 +57,5 @@ export default class AuthRepository {
         return data.rows[0].session_id;
     }
 }
+
+// TODO: ARREGLAR LO DE EL LOCAL QUE HACE QUE TENGA DAR A REENVIAR EL LINK
