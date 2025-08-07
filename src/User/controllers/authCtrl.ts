@@ -38,7 +38,7 @@ export const signUp: RequestHandler = async (req, res, next) => {
 export const magicLink: RequestHandler = async (req, res, next) => {
     try {
         const { user_id, email } = req.body;
-        const { id, session_id }= await magicLinkService(user_id);
+        const { id, session_id } = await magicLinkService(user_id);
 
         const magicLink = `${config.origin}/auth/magic_link/${id}`;
 

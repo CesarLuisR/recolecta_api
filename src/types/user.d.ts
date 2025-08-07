@@ -8,4 +8,5 @@ export interface User {
     tipo_usuario: 'cliente' | 'admin',
     creado_en: Date;
     municipio_id: number;
+    verified: boolean;
 }
