@@ -1,4 +1,4 @@
-import isEmail from "validator/lib/isEmail"
+import isEmail from "validator/lib/isEmail";
 import { BadRequestError, Conflict, NotFoundError } from "../../utils/error";
 import UserRepository from "../repository/userRepository";
 

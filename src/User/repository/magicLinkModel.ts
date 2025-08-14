@@ -4,7 +4,7 @@ export const save = `
     RETURNING id, session_id;
 `;
 
-export const getValid = `
+export const getNotExpired = `
     SELECT 
         id,
         user_id,
@@ -13,9 +13,17 @@ export const getValid = `
         created_at
     FROM magic_links
     WHERE id = $1
-        AND session_id = $2
         AND expires_at > NOW()
-        AND used = false;
+`;
+
+export const isUsed = `
+    SELECT 1 FROM magic_links
+    WHERE id = $1 AND used = true
+`;
+
+export const verifySession = `
+    SELECT 1 FROM magic_links
+    WHERE id = $1 AND session_id = $2
 `;
 
 export const getUsedLink = `

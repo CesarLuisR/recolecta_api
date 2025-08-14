@@ -1,7 +1,5 @@
-// magicLinkRepository.test.ts
 import MagicLinkRepository, { MagicLinkI } from '../../../src/User/repository/magicLinkRepository';
 import { pool } from '../../../src/database';
-import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../../src/utils/error';
 
 jest.mock('../../../src/database', () => ({
   pool: {
@@ -18,7 +16,14 @@ describe('MagicLinkRepository', () => {
 
   describe('create', () => {
     it('retorna MagicLinkI si se crea correctamente', async () => {
-      const mockData = { id: 'abc', session_id: 'session123' };
+      const mockData: MagicLinkI = {
+        id: 'abc',
+        session_id: 'session123',
+        user_id: 1,
+        expires_at: new Date(),
+        used: false,
+        created_at: new Date()
+      };
       mockQuery.mockResolvedValue({
         rowCount: 1,
         rows: [mockData],
@@ -29,63 +34,109 @@ describe('MagicLinkRepository', () => {
       expect(result).toEqual(mockData);
     });
 
-    it('lanza NotFoundError si no se crea', async () => {
+    it('retorna null si no se crea', async () => {
       mockQuery.mockResolvedValue({
         rowCount: 0,
         rows: [],
       });
 
-      await expect(MagicLinkRepository.create(1)).rejects.toBeInstanceOf(NotFoundError);
+      const result = await MagicLinkRepository.create(1);
+      expect(result).toBeNull();
     });
   });
 
-  describe('getValid', () => {
-    it('retorna el link válido si existe', async () => {
-      const mockLink = { id: 'abc', token: 'token123' };
+  describe('getNotExpired', () => {
+    it('retorna el link si no ha expirado', async () => {
+      const mockLink = { id: 'abc', session_id: 's1', user_id: 1, expires_at: new Date(), used: false, created_at: new Date() };
       mockQuery.mockResolvedValue({
         rowCount: 1,
         rows: [mockLink],
       });
 
-      const result = await MagicLinkRepository.getValid('abc', 'token123');
-      expect(pool.query).toHaveBeenCalled();
+      const result = await MagicLinkRepository.getNotExpired('abc');
       expect(result).toEqual(mockLink);
     });
 
-    it('lanza ForbiddenError si link no válido', async () => {
+    it('retorna null si está expirado o no existe', async () => {
       mockQuery.mockResolvedValue({
         rowCount: 0,
         rows: [],
       });
 
-      await expect(MagicLinkRepository.getValid('abc', 'token123')).rejects.toBeInstanceOf(ForbiddenError);
+      const result = await MagicLinkRepository.getNotExpired('abc');
+      expect(result).toBeNull();
     });
   });
 
   describe('getUsedLink', () => {
-    it('no lanza error si el link fue usado', async () => {
+    it('retorna true si el link fue usado', async () => {
       mockQuery.mockResolvedValue({
         rowCount: 1,
         rows: [{}],
       });
 
-      await expect(MagicLinkRepository.getUsedLink('abc')).resolves.toBeUndefined();
+      const result = await MagicLinkRepository.getUsedLink('abc');
+      expect(result).toBe(true);
     });
 
-    it('lanza UnauthorizedError si no hay link usado', async () => {
+    it('retorna false si no hay link usado', async () => {
       mockQuery.mockResolvedValue({
         rowCount: 0,
         rows: [],
       });
 
-      await expect(MagicLinkRepository.getUsedLink('abc')).rejects.toBeInstanceOf(UnauthorizedError);
+      const result = await MagicLinkRepository.getUsedLink('abc');
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isUsedLink', () => {
+    it('retorna true si el link está marcado como usado', async () => {
+      mockQuery.mockResolvedValue({
+        rowCount: 1,
+        rows: [{}],
+      });
+
+      const result = await MagicLinkRepository.isUsedLink('abc');
+      expect(result).toBe(true);
+    });
+
+    it('retorna false si no está usado', async () => {
+      mockQuery.mockResolvedValue({
+        rowCount: 0,
+        rows: [],
+      });
+
+      const result = await MagicLinkRepository.isUsedLink('abc');
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isSessionValid', () => {
+    it('retorna true si la sesión es válida', async () => {
+      mockQuery.mockResolvedValue({
+        rowCount: 1,
+        rows: [{}],
+      });
+
+      const result = await MagicLinkRepository.isSessionValid('abc', 'token123');
+      expect(result).toBe(true);
+    });
+
+    it('retorna false si la sesión no es válida', async () => {
+      mockQuery.mockResolvedValue({
+        rowCount: 0,
+        rows: [],
+      });
+
+      const result = await MagicLinkRepository.isSessionValid('abc', 'token123');
+      expect(result).toBe(false);
     });
   });
 
   describe('setUsed', () => {
-    it('llama a query para marcar link como usado', async () => {
+    it('ejecuta query para marcar como usado', async () => {
       mockQuery.mockResolvedValue({});
-
       await MagicLinkRepository.setUsed('abc');
       expect(pool.query).toHaveBeenCalledWith(expect.any(String), ['abc']);
     });

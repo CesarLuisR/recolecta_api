@@ -2,12 +2,14 @@ import { RequestHandler } from "express";
 import { LogInData, SignUpData } from "../../types/auth";
 import { BadRequestError, ForbiddenError, UnauthorizedError } from "../../utils/error";
 import { validateCedulaService } from "../services/cedulaService";
-import { getSessionIdService, loginUserService, magicConsumeService, magicLinkService, registerUserService, verifyMagicLinkService } from "../services/authServices";
+import { consumeUsedMagicLink, getSessionIdService, loginUserService, magicConsumeService, magicLinkService, registerUserService, verifyMagicLinkService } from "../services/authServices";
 import config from "../../config";
 import { generateAccessToken, generateRefreshToken, TokenPayload, verifyAccessToken, verifyRefreshToken } from "../../utils/token";
 import TokenRepository from "../repository/tokenRepository";
 import { emailVerificationService } from "../services/emailVerificationService";
 import transporter from "../../utils/SMTP";
+import MagicLinkRepository from "../repository/magicLinkRepository";
+import { User } from "../../types/user";
 
 export const signUp: RequestHandler = async (req, res, next) => {
     try {
@@ -77,7 +79,6 @@ export const validateMagicLink: RequestHandler = async (req, res, next) => {
 export const getSessionId: RequestHandler = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        // TODO: El error puede estar aqui
         const session_id = await getSessionIdService(id);
 
         res
@@ -97,13 +98,19 @@ export const getSessionId: RequestHandler = async (req, res, next) => {
 
 export const magicConsume: RequestHandler = async (req, res, next) => {
     try {
+        const consumed = req.query.consumed;
+        const id = req.params.id;
+
+        let user: User | null = null; 
+
+        if (!consumed) user = await magicConsumeService(id)
+        else user = await consumeUsedMagicLink(id);
+
         const token = req.cookies.session_id;
 
-        if (!token) 
-            throw new UnauthorizedError();
-
-        const id = req.params.id;
-        const user = await magicConsumeService(id, token);
+        const isSessionValid = MagicLinkRepository.isSessionValid(id, token);
+        if (!token || !isSessionValid) 
+            throw new UnauthorizedError("NO_SESSION");
 
         const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo_usuario });
         const refreshToken = generateRefreshToken({ id: user.id, tipo_usuario: user.tipo_usuario });

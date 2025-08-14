@@ -7,7 +7,7 @@ const connectionString =
 
 export const pool = new Pool({
     connectionString,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    // ssl: {
+    //     rejectUnauthorized: false
+    // }
 });

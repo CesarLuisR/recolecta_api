@@ -13,49 +13,45 @@ export default class AuthRepository {
         this.client = pool;
     }
 
-    static async getMunicipiosBySlug(slug: string): Promise<number> {
+    static async getMunicipiosBySlug(slug: string): Promise<number | null> {
         const data = await pool.query(authQueries.getMunicipioBySlug, [slug]);
 
         if (data.rowCount === 0)
-            throw new NotFoundError("Municipio not found");
+            return null;
 
         return data.rows[0].id;
     }
 
-    static async createUser(data: SignUpData, municipio_id: string) {
+    static async createUser(data: SignUpData, municipio_id: string): Promise<User | null> {
         const raw = await pool.query(
             authQueries.createUser,
             [data.nombre, data.apellido, data.cedula, data.email, "cliente", municipio_id]
         );
 
         if (raw.rowCount === 0) 
-            throw new Error();
+            return null;
 
         return raw.rows[0];
     }
 
 
-    static async setUserStatus(id: number): Promise<User> {
+    static async setUserStatus(id: number): Promise<User | null> {
         const data = await pool.query(authQueries.setUserStatus, [id]);
 
-        if (data.rowCount === 0)
-            throw new NotFoundError();
+        if (data.rowCount === 0) return null;
 
         const user: User = data.rows[0];
         return user;
     }
 
-    static async getUserSession(id: number): Promise<string> {
+    static async getUserSession(id: number): Promise<string | null> {
         const data = await pool.query(
             authQueries.getUserSession,
             [id]
         );
 
-        if (data.rowCount === 0)
-            throw new NotFoundError("Este usuario esta creado y no necesita verificacion");
+        if (data.rowCount === 0) return null;
 
         return data.rows[0].session_id;
     }
 }
-
-// TODO: ARREGLAR LO DE EL LOCAL QUE HACE QUE TENGA DAR A REENVIAR EL LINK
