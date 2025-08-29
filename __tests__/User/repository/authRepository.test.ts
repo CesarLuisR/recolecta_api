@@ -1,15 +1,12 @@
+import { pool } from "../../../src/database";
 import AuthRepository from "../../../src/User/repository/authRepository";
-import { NotFoundError } from "../../../src/utils/error";
+import * as authQueries from "../../../src/User/repository/authModel";
+import { SignUpData } from "../../../src/types/auth";
+import { User } from "../../../src/types/user";
 
 jest.mock("../../../src/database", () => ({
-  pool: {
-    query: jest.fn()
-  }
+  pool: { query: jest.fn() }
 }));
-
-import { pool } from "../../../src/database";
-
-const mockQuery = pool.query as jest.Mock;
 
 describe("AuthRepository", () => {
   afterEach(() => {
@@ -17,103 +14,118 @@ describe("AuthRepository", () => {
   });
 
   describe("getMunicipiosBySlug", () => {
-    it("retorna el id si existe", async () => {
-      mockQuery.mockResolvedValue({
-        rowCount: 1,
-        rows: [{ id: 10 }],
-      });
+    it("devuelve null si no encuentra municipio", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rowCount: 0 });
 
-      const id = await AuthRepository.getMunicipiosBySlug("santiago");
-      expect(pool.query).toHaveBeenCalled();
-      expect(id).toBe(10);
+      const result = await AuthRepository.getMunicipiosBySlug("no-existe");
+      expect(result).toBeNull();
+      expect(pool.query).toHaveBeenCalledWith(authQueries.getMunicipioBySlug, ["no-existe"]);
     });
 
-    it("lanza NotFoundError si no existe", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
-        rowCount: 0,
-        rows: []
+    it("devuelve el id si encuentra municipio", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ id: 15 }]
       });
 
-      await expect(AuthRepository.getMunicipiosBySlug("falso"))
-        .rejects
-        .toBeInstanceOf(NotFoundError);
+      const result = await AuthRepository.getMunicipiosBySlug("santiago");
+      expect(result).toBe(15);
     });
   });
 
   describe("createUser", () => {
-    const data = {
+    const mockData: SignUpData = {
       nombre: "Juan",
-      apellido: "Perez",
-      cedula: "00100000001",
-      email: "juan@gmail.com",
+      apellido: "Pérez",
+      cedula: "001-1234567-8",
+      email: "test@example.com",
+      password: "securePass123",
+      municipio_id: 1
     };
 
-    it("crea usuario y devuelve su row", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
-        rowCount: 1,
-        rows: [{ id: 1, ...data, tipo_usuario: "cliente" }]
-      });
 
-      const user = await AuthRepository.createUser(data as any, "12");
-      expect(pool.query).toHaveBeenCalled();
-      expect(user).toMatchObject({ id: 1, email: "juan@gmail.com" });
+    it("devuelve null si no se crea", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rowCount: 0 });
+
+      const result = await AuthRepository.createUser(mockData, "10");
+      expect(result).toBeNull();
+      expect(pool.query).toHaveBeenCalledWith(
+        authQueries.createUser,
+        ["Juan", "Pérez", "001-1234567-8", "test@example.com", "cliente", "10"]
+      );
     });
 
-    it("lanza Error si rowCount = 0", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
-        rowCount: 0,
-        rows: []
+    it("devuelve el usuario creado", async () => {
+      const user: User = {
+          id: 1,
+          nombre: "Juan",
+          apellido: "Pérez",
+          email: "test@example.com",
+          cedula: "001-1234567-8",
+          tipo_usuario: "cliente",
+          municipio_id: 10,
+          password_hash: "",
+          creado_en: new Date(),
+          verified: false
+      };
+      (pool.query as jest.Mock).mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [user]
       });
 
-      await expect(AuthRepository.createUser(data as any, "12"))
-        .rejects
-        .toThrow(Error);
+      const result = await AuthRepository.createUser(mockData, "10");
+      expect(result).toEqual(user);
     });
   });
 
   describe("setUserStatus", () => {
-    it("devuelve el usuario actualizado si existe", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
+    it("devuelve null si no actualiza", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rowCount: 0 });
+
+      const result = await AuthRepository.setUserStatus(1);
+      expect(result).toBeNull();
+    });
+
+    it("devuelve usuario actualizado", async () => {
+      const updatedUser: User = {
+        id: 1,
+        nombre: "Juan",
+        apellido: "Pérez",
+        email: "test@example.com",
+        cedula: "001-1234567-8",
+        tipo_usuario: "cliente",
+        municipio_id: 10,
+        verified: true,
+        password_hash: "",
+        creado_en: new Date()
+      };
+
+      (pool.query as jest.Mock).mockResolvedValueOnce({
         rowCount: 1,
-        rows: [{ id: 1, verified: true }]
+        rows: [updatedUser]
       });
 
       const result = await AuthRepository.setUserStatus(1);
-      expect(result.verified).toBe(true);
-    });
-
-    it("lanza NotFoundError si no existe", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
-        rowCount: 0,
-        rows: []
-      });
-
-      await expect(AuthRepository.setUserStatus(1))
-        .rejects
-        .toBeInstanceOf(NotFoundError);
+      expect(result).toEqual(updatedUser);
     });
   });
 
   describe("getUserSession", () => {
-    it("devuelve el session_id si existe", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
+    it("devuelve null si no hay sesión", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rowCount: 0 });
+
+      const result = await AuthRepository.getUserSession(1);
+      expect(result).toBeNull();
+    });
+
+    it("devuelve session_id si existe", async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({
         rowCount: 1,
         rows: [{ session_id: "abc-123" }]
       });
 
-      const id = await AuthRepository.getUserSession(5);
-      expect(id).toBe("abc-123");
-    });
-
-    it("lanza NotFoundError si rowCount=0", async () => {
-      (pool.query as jest.Mock).mockResolvedValue({
-        rowCount: 0,
-        rows: []
-      });
-
-      await expect(AuthRepository.getUserSession(99))
-        .rejects
-        .toBeInstanceOf(NotFoundError);
+      const result = await AuthRepository.getUserSession(1);
+      expect(result).toBe("abc-123");
     });
   });
 });

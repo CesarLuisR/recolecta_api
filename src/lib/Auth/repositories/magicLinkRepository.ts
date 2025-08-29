@@ -1,7 +1,6 @@
 import { Pool } from "pg";
-import { pool } from "../../database";
 import * as magicLinkQueries from "./magicLinkModel";
-import { NotFoundError, UnauthorizedError } from "../../utils/error";
+import { pool } from "../../../database";
 
 // Ya explique el por que del formato en el authModel
 export interface MagicLinkI {

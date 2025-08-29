@@ -1,17 +1,23 @@
-import { LogInData, SignUpData } from "../../types/auth";
-import { User } from "../../types/user";
+import { SignUpData, SignUpPersonaData } from "../../lib/Auth/controllers/clienteCtrl";
+import { emailVerificationService } from "../../lib/Auth/services/emailVerificationService";
+import { Persona, User } from "../../types/User";
 import { Conflict, NotFoundError, UnauthorizedError } from "../../utils/error";
+import { hashPassword } from "../../utils/hash";
 import AuthRepository from "../repository/authRepository";
 import MagicLinkRepository, { MagicLinkI } from "../repository/magicLinkRepository";
 import UserRepository from "../repository/userRepository";
 
 export const registerUserService = async (data: SignUpData, municipio_slug: string) => {
     try {
-        const id = await AuthRepository.getMunicipiosBySlug(municipio_slug);
-        if (!id) throw new UnauthorizedError("Municipio no encontrado");
+        const municipio_id = await AuthRepository.getMunicipiosBySlug(municipio_slug);
+        if (!municipio_id) throw new NotFoundError("Municipio no encontrado");
 
-        const user: User | null = await AuthRepository.createUser(data, id.toString());
-        if (!user) throw new UnauthorizedError("Usuario no encontrado");
+        await emailVerificationService(data.correo);
+
+        const password_hash = await hashPassword(data.password);
+
+        const user: User | null = await AuthRepository.createUser(data, password_hash, municipio_id);
+        if (!user) throw new NotFoundError("Usuario no encontrado");
 
         return user;
     } catch(e: any) {

@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { pool } from "../../database";
 import * as userQueries from "./userModel";
-import { User } from "../../types/user";
+import { User } from "../../types/User";
 import { NotFoundError } from "../../utils/error";
 import { SignUpData } from "../../types/auth";
 import { UserCredentials } from "../services/userServices";

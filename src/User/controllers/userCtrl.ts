@@ -3,8 +3,8 @@ import { verifyAccessToken } from "../../utils/token";
 import { loadUserService, getUserService } from "../services/userServices";
 import config from "../../config";
 import { BadRequestError } from "../../utils/error";
-import { validateCedulaService } from "../services/cedulaService";
-import { emailVerificationService } from "../services/emailVerificationService";
+import { validateCedulaService } from "../../lib/Auth/services/cedulaService";
+import { emailVerificationService } from "../../lib/Auth/services/emailVerificationService";
 
 export const load: RequestHandler = async (req, res, next) => {
     try {

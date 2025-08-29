@@ -2,8 +2,8 @@ import { Pool } from "pg";
 import { pool } from "../../database";
 import * as authQueries from "./authModel"
 import { NotFoundError } from "../../utils/error";
-import { SignUpData } from "../../types/auth";
-import { User } from "../../types/user";
+import { User } from "../../types/User";
+import { SignUpData } from "../../lib/Auth/controllers/clienteCtrl";
 
 // CONTEXT: Designed this way thinking in a future hexagonal arch
 
@@ -22,10 +22,13 @@ export default class AuthRepository {
         return data.rows[0].id;
     }
 
-    static async createUser(data: SignUpData, municipio_id: string): Promise<User | null> {
+    static async createUser(data: SignUpData, password_hash: string, municipio_id: number): Promise<User | null> {
         const raw = await pool.query(
-            authQueries.createUser,
-            [data.nombre, data.apellido, data.cedula, data.email, "cliente", municipio_id]
+            authQueries.createCliente,
+            [
+                data.nombre, data.apellido, data.correo, password_hash, municipio_id,
+                data.tipo, data.identificador, data.tipo_identificador
+            ]
         );
 
         if (raw.rowCount === 0) 
@@ -36,7 +39,7 @@ export default class AuthRepository {
 
 
     static async setUserStatus(id: number): Promise<User | null> {
-        const data = await pool.query(authQueries.setUserStatus, [id]);
+        const data = await pool.query(authQueries.setClienteStatus, [id]);
 
         if (data.rowCount === 0) return null;
 

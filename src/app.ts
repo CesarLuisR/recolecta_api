@@ -8,6 +8,9 @@ import config from "./config";
 import errorHandler from "./middlewares/errorHandler";
 import authRoutes from "./User/routes/authRoutes";
 import userRoutes from "./User/routes/userRoutes";
+import containersRoutes from "./Contenedores/routes";
+
+import authClienteRoutes from "./lib/Auth/routes/clienteRoutes";
 
 const app = express();
 
@@ -28,6 +31,14 @@ app.use(morgan("dev"));
 // routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/containers", containersRoutes);
+
+// new routes
+app.use("/api/v1/auth/clientes", authClienteRoutes);
+
+
 app.use(errorHandler);
+
+
 
 export default app;

@@ -1,6 +1,5 @@
 import { Pool } from "pg";
-import { pool } from "../../database";
-import { NotFoundError } from "../../utils/error";
+import { pool } from "../../../database";
 import * as tokenQueries from "./tokenModel";
 import { addDays } from "date-fns"; 
 

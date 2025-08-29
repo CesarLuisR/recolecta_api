@@ -1,8 +1,8 @@
 import isEmail from "validator/lib/isEmail";
-import { BadRequestError, Conflict, NotFoundError } from "../../utils/error";
-import UserRepository from "../repository/userRepository";
+import { BadRequestError, Conflict } from "../../../utils/error";
+import UserRepository from "../../../User/repository/userRepository";
 
-export const emailVerificationService = async (email: string): Promise<boolean> => {
+export const emailVerificationService = async (email: string) => {
     const isFormatValid = isEmail(email);
     if (!isFormatValid)
         throw new BadRequestError();
@@ -10,6 +10,4 @@ export const emailVerificationService = async (email: string): Promise<boolean> 
     const user = await UserRepository.getUserByEmail(email);
     if (user) 
         throw new Conflict("El usuario esta registrado");
-
-    return true;
 }

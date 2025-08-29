@@ -7,6 +7,7 @@ export const save = `
 export const getNotExpired = `
     SELECT 
         id,
+        session_id,
         user_id,
         expires_at,
         used,

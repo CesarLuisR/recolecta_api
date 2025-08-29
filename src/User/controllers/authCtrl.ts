@@ -1,15 +1,15 @@
 import { RequestHandler } from "express";
 import { LogInData, SignUpData } from "../../types/auth";
 import { BadRequestError, ForbiddenError, UnauthorizedError } from "../../utils/error";
-import { validateCedulaService } from "../services/cedulaService";
+import { validateCedulaService } from "../../lib/Auth/services/cedulaService";
 import { consumeUsedMagicLink, getSessionIdService, loginUserService, magicConsumeService, magicLinkService, registerUserService, verifyMagicLinkService } from "../services/authServices";
 import config from "../../config";
 import { generateAccessToken, generateRefreshToken, TokenPayload, verifyAccessToken, verifyRefreshToken } from "../../utils/token";
-import TokenRepository from "../repository/tokenRepository";
-import { emailVerificationService } from "../services/emailVerificationService";
+import TokenRepository from "../../lib/Auth/repositories/tokenRepository";
+import { emailVerificationService } from "../../lib/Auth/services/emailVerificationService";
 import transporter from "../../utils/SMTP";
 import MagicLinkRepository from "../repository/magicLinkRepository";
-import { User } from "../../types/user";
+import { User } from "../../types/User";
 
 export const signUp: RequestHandler = async (req, res, next) => {
     try {
@@ -142,11 +142,8 @@ export const magicConsume: RequestHandler = async (req, res, next) => {
 export const logIn: RequestHandler = async (req, res, next) => {
     try {
         const data: LogInData = req.body;
-        if (!data.email || !data.password) 
+        if (!data.email) 
             throw new BadRequestError("Se necesitan todos los datos");
-
-        if (typeof data.password != "string" || data.password.length > 30)
-            throw new BadRequestError("Clave con formato erroneo");
 
         const user = await loginUserService(data);
 
