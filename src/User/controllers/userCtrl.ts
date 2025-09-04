@@ -20,7 +20,6 @@ export const load: RequestHandler = async (req, res, next) => {
 export const getUser: RequestHandler = async (req, res, next) => {
     try {
         const { email } = req.body;
-        console.log("Email", req.body);
         const user = await getUserService(email);
         res.status(200).json({ id: user.id });
     } catch(e: any) {

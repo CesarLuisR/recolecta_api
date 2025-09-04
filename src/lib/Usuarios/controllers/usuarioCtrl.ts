@@ -1,6 +1,9 @@
 import { RequestHandler } from "express";
-import { NotFoundError, UnauthorizedError } from "../../../utils/error";
-import { UsuarioRepository } from "../repositories/usuarioRepository";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../../../utils/error";
+import { getClienteByUsuarioId, getClienteByUsuarioIdAndVerificado, getUsuarioByEmail, UsuarioRepository } from "../repositories/usuarioRepository";
+import { SignUpEmpresaData, SignUpPersonaData } from "../../Auth/controllers/clienteCtrl";
+import { validateCedulaService } from "../../Auth/services/cedulaService";
+import { validateRNCService } from "../../Auth/services/rncService";
 
 export const getUsuariosCtrl: RequestHandler = async (req, res, next) => {
     try {
@@ -70,16 +73,59 @@ export const checkEmailExistsCtrl: RequestHandler = async (req, res, next) => {
         next(error);
     }
 }
-// TODO: Arreglar esto
-// esta mal planteado, no verified debe literalmnete obtener un usuario con todos sus datos si el formualio es correcto
 
-// entonces deberiamos hacerlo dependiendo del tipo de cliente
-export const verifyUsuarioCtrl: RequestHandler = async (req, res, next) => {
+export const verifyUsuarioPersonaCtrl: RequestHandler = async (req, res, next) => {
     try {
-        const { id } = req.params;  
-        const user = await UsuarioRepository.getClienteByUsuarioIdAndVerificado(Number(id), true);
-        if (!user) throw new NotFoundError("User not found or already verified");
-        res.status(200).json({ message: "Verification process initiated" });
+        const data: SignUpPersonaData = req.body;
+
+        for (const key of Object.keys(data) as Array<keyof SignUpPersonaData>) {
+            const value = data[key];
+  
+            if (key === 'fecha_nacimiento' && value instanceof Date) continue;
+
+            if (!value || typeof value != 'string')
+                throw new BadRequestError("Formato invalido");
+        }
+
+        if (!validateCedulaService(data.cedula))
+            throw new BadRequestError("Cedula invalida");
+
+        const user = await getUsuarioByEmail(data.correo);
+        if (!user) throw new NotFoundError("Usuario no encontrado");
+
+        const cliente = await getClienteByUsuarioId(user.id);
+
+        if (cliente && cliente.verificado)
+            throw new BadRequestError("Usuario ya verificado");
+
+        res.status(201).json({ message: "Usuario encontrado exitosamente", user });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const verifyUsuarioEmpresaCtrl : RequestHandler = async (req, res, next) => {
+    try {
+        const data: SignUpEmpresaData = req.body;
+
+        for (const key of Object.keys(data) as Array<keyof SignUpEmpresaData>) {
+            const value = data[key];
+
+            if (!value || typeof value != 'string')
+                throw new BadRequestError("Formato invalido");
+        }
+
+        if (!validateRNCService(data.rnc))
+            throw new BadRequestError("RNC invalido");
+
+        const user = await getUsuarioByEmail(data.correo);
+        if (!user) throw new NotFoundError("Usuario no encontrado");
+
+        const cliente = await getClienteByUsuarioId(user.id);
+        if (cliente && cliente.verificado)
+            throw new BadRequestError("Usuario ya verificado");
+
+        res.status(201).json({ message: "Usuario encontrado exitosamente", user });
     } catch (error) {
         next(error);
     }

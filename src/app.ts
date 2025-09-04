@@ -6,11 +6,10 @@ import cookieParser from "cookie-parser"
 import config from "./config";
 
 import errorHandler from "./middlewares/errorHandler";
-import authRoutes from "./User/routes/authRoutes";
-import userRoutes from "./User/routes/userRoutes";
-import containersRoutes from "./Contenedores/routes";
 
 import authClienteRoutes from "./lib/Auth/routes/clienteRoutes";
+import usuarioRoutes from "./lib/Usuarios/routes/usuarioRoutes";
+import contenedorRoutes from "./lib/Contenedores/routes/contenedorRoutes";
 
 const app = express();
 
@@ -29,13 +28,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 
 // routes
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/containers", containersRoutes);
+// app.use("/api/v1/auth", authRoutes);
+// app.use("/api/v1/user", userRoutes);
+// app.use("/api/v1/containers", containersRoutes);
 
 // new routes
-app.use("/api/v1/auth/clientes", authClienteRoutes);
-
+app.use("/api/v1/auth", authClienteRoutes);
+app.use("/api/v1/usuarios", usuarioRoutes);
+app.use("/api/v1/contenedores", contenedorRoutes);
 
 app.use(errorHandler);
 

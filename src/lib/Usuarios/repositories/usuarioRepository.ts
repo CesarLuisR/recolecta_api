@@ -1,5 +1,5 @@
 import { pool } from "../../../database"
-import { Usuario } from "../../../types/User";
+import { Cliente, Usuario } from "../../../types/User";
 import * as usuarioQueries from "./usuarioModel";
 
 export const getUsuarioByEmail = async (email: string) => {
@@ -30,7 +30,7 @@ export const findById = async (id: number) => {
     return user;
 };
 
-export const getClienteByUsuarioId = async (id: number) => {
+export const getClienteByUsuarioId = async (id: number): Promise<Cliente | null> => {
     const data = await pool.query(usuarioQueries.getClienteByUsuarioIdModel, [id]);
     if (data.rowCount === 0) return null;
 

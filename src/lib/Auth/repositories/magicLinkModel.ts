@@ -1,5 +1,5 @@
 export const save = `
-    INSERT INTO magic_links(user_id, expires_at)
+    INSERT INTO magic_links(user_id, expira_en)
     VALUES ($1, NOW() + INTERVAL '10 minutes')
     RETURNING id, session_id;
 `;
@@ -9,12 +9,12 @@ export const getNotExpired = `
         id,
         session_id,
         user_id,
-        expires_at,
+        expira_en,
         used,
-        created_at
+        creado_en
     FROM magic_links
     WHERE id = $1
-        AND expires_at > NOW()
+        AND expira_en > NOW()
 `;
 
 export const isUsed = `
@@ -31,9 +31,9 @@ export const getUsedLink = `
     SELECT 
         id,
         user_id,
-        expires_at,
+        expira_en,
         used,
-        created_at
+        creado_en
     FROM magic_links
     WHERE id = $1
         AND used = true;

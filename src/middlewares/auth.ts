@@ -1,13 +1,13 @@
 import { RequestHandler } from "express";
 import { TokenPayload, verifyAccessToken } from "../utils/token";
-import { UnauthorizedError } from "../utils/error";
+import { TokenError, UnauthorizedError } from "../utils/error";
 
 export const authenticateToken: RequestHandler = (req, res, next) => {
     const authHeader = req.headers['authorization'];
 
     const token = authHeader && authHeader.split(' ')[1];
     if (token == null) {
-        next(new UnauthorizedError("Denied access. No token provided"));
+        next(new TokenError());
         return;
     }
 

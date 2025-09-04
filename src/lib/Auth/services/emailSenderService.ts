@@ -1,13 +1,13 @@
-// email.ts
 import nodemailer from "nodemailer";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import config from "../../../config";
 
 export async function sendWithNodemailer(to: string, subject: string, html: string) {
     const transporter = nodemailer.createTransport({
-      	host: "smtp.example.com",
+      	host: config.SMTP.host,
       	port: 587,
       	secure: false,
-      	auth: { user: "user", pass: "pass" }
+      	auth: { user: config.SMTP.user, pass: config.SMTP.pass }
   	});
 
   	await transporter.sendMail({

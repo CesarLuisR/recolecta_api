@@ -10,6 +10,13 @@ CREATE TABLE Municipios (
     activo BOOLEAN
 );
 
+INSERT INTO Municipios (nombre, slug, lat, lng, activo) VALUES
+('San Pedro de Macorís', 'SPM', 18.4500, -69.3000, TRUE),
+('Santo Domingo', 'SD', 18.4861, -69.9312, TRUE),
+('Santiago de los Caballeros', 'STI', 19.4500, -70.7000, TRUE),
+('La Romana', 'LR', 18.4300, -68.9700, TRUE),
+('Puerto Plata', 'PP', 19.7900, -70.6900, TRUE);
+
 -- ===========================
 -- Sección 2: Usuarios y Roles
 -- ===========================
@@ -109,11 +116,14 @@ CREATE TABLE Contenedores (
     ubicacion VARCHAR(255),
     estado BOOLEAN DEFAULT TRUE,
     visibilidad BOOLEAN,
-    capacidad VARCHAR(50),
+    capacidad VARCHAR(50) CHECK(capacidad IN ('pequeño, mediano, grande')),
     ultima_recoleccion TIMESTAMP,
     proxima_recoleccion TIMESTAMP,
     municipio_id INT REFERENCES Municipios(id) ON DELETE CASCADE
 );
+
+INSERT INTO Contenedores (codigo, lat, lng, ubicacion, estado, visibilidad, capacidad, ultima_recoleccion, proxima_recoleccion, municipio_id)
+VALUES
 
 CREATE TABLE Garajes (
     id SERIAL PRIMARY KEY,
@@ -141,10 +151,12 @@ CREATE TABLE Recibos (
 
 CREATE TABLE Servicios (
     id SERIAL PRIMARY KEY,
-    capacidad INT NOT NULL CHECK(capacidad > 0),
+    capacidad VARCHAR(10) NOT NULL CHECK(capacidad IN ('pequeño, mediano, grande'))
     lat DECIMAL(10,7) NOT NULL,
     lng DECIMAL(10,7) NOT NULL,
-    ubicacion VARCHAR(255),
+    calle VARCHAR(100),
+    numero INT,
+    sector VARCHAR(100),
     descripcion TEXT,
     observaciones TEXT,
     observaciones_admin TEXT,
@@ -366,7 +378,7 @@ CREATE TABLE refresh_tokens (
 
 CREATE TABLE magic_links (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID,
+    session_id UUID DEFAULT gen_random_uuid(),
     user_id INT REFERENCES Usuarios(id) ON DELETE CASCADE,
     expira_en TIMESTAMP,
     used BOOLEAN DEFAULT FALSE,

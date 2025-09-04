@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/", authenticateToken, usuarioCtrl.getUsuariosCtrl); 
 router.get("/:id", authenticateToken, usuarioCtrl.getUsuarioByIdCtrl);
-router.get("/me", authenticateToken, usuarioCtrl.getMeCtrl);
+router.post("/me", authenticateToken, usuarioCtrl.getMeCtrl);
 // router.post("/", usuarioCtrl.createUsuarioCtrl);
 // router.put("/:id", usuarioCtrl.updateUsuarioCtrl);
 // router.delete("/:id", usuarioCtrl.deleteUsuarioCtrl);
@@ -17,4 +17,7 @@ router.get("/:id/cliente", authenticateToken, usuarioCtrl.getClienteByUsuarioIdC
 // router.get("/:id/empresa", usuarioCtrl.getEmpresaByUsuarioIdCtrl);
 
 router.get("/verifyEmail/:email", usuarioCtrl.checkEmailExistsCtrl);
-router.post("/:id/verify-cliente", usuarioCtrl.verifyUsuarioCtrl);
+router.post("/verify-persona", usuarioCtrl.verifyUsuarioPersonaCtrl);
+router.post("/verify-empresa", usuarioCtrl.verifyUsuarioEmpresaCtrl);
+
+export default router;

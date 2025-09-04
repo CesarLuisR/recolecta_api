@@ -1,5 +1,4 @@
 export const createPersonaModel = `
-    BEGIN;
     WITH nuevo_usuario AS (
         INSERT INTO Usuarios(correo, tipo, password_hash, municipio_id)
         VALUES ($1, 'cliente', $2, $3)
@@ -33,12 +32,9 @@ export const createPersonaModel = `
     FROM nuevo_usuario u
     JOIN nuevo_cliente c ON u.id = c.usuario_id
     JOIN nueva_persona p ON c.id = p.cliente_id;
-
-    COMMIT;
 `;
 
 export const createEmpresaModel = `
-    BEGIN;
     WITH nuevo_usuario AS (
         INSERT INTO Usuarios(correo, tipo, password_hash, municipio_id)
         VALUES ($1, 'cliente', $2, $3)
@@ -72,8 +68,6 @@ export const createEmpresaModel = `
     FROM nuevo_usuario u
     JOIN nuevo_cliente c ON u.id = c.usuario_id
     JOIN nueva_empresa e ON c.id = e.cliente_id;
-
-    COMMIT;
 `;
 
 export const setClienteVerificacionModel = `

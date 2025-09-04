@@ -1,7 +1,6 @@
 import { Usuario } from "../../../types/User";
 import { NotFoundError, UnauthorizedError } from "../../../utils/error";
 import MagicLinkRepository, { MagicLinkI } from "../repositories/magicLinkRepository";
-import * as clienteRepository from "../../Usuarios/repositories/clienteRepository";
 
 export const magicLinkService = async (user_id: number): Promise<MagicLinkI> => {
     const magicData: MagicLinkI | null = await MagicLinkRepository.create(user_id);
@@ -12,7 +11,7 @@ export const magicLinkService = async (user_id: number): Promise<MagicLinkI> => 
     return magicData;
 };
 
-export const magicConsumeService = async (id: string): Promise<Usuario> => {
+export const magicConsumeService = async (id: string): Promise<MagicLinkI> => {
     const isUsed = await MagicLinkRepository.isUsedLink(id);
     if (isUsed)
         throw new UnauthorizedError("USED");
@@ -22,14 +21,10 @@ export const magicConsumeService = async (id: string): Promise<Usuario> => {
         throw new UnauthorizedError("EXPIRED");
 
     await MagicLinkRepository.setUsed(id);
-
-    const user = await clienteRepository.setClienteVerificacion(data.user_id);
-    if (!user) throw new NotFoundError();
-
-    return user;
+    return data;
 }
 
-export const consumeUsedMagicLink = async (id: string): Promise<Usuario> => {
+export const consumeUsedMagicLink = async (id: string): Promise<MagicLinkI> => {
     const isUsedLink = await MagicLinkRepository.getUsedLink(id);
     if (!isUsedLink)
         throw new UnauthorizedError("Link no encontrado");
@@ -38,8 +33,5 @@ export const consumeUsedMagicLink = async (id: string): Promise<Usuario> => {
     if (!data)
         throw new UnauthorizedError("EXPIRED");
 
-    const user = await clienteRepository.setClienteVerificacion(data.user_id);
-    if (!user) throw new NotFoundError();
-
-    return user;
+    return data;
 }

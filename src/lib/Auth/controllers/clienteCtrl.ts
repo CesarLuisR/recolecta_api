@@ -1,5 +1,5 @@
 import { RequestHandler } from "express"
-import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "../../../utils/error";
+import { BadRequestError, ForbiddenError, NotFoundError, TokenError, UnauthorizedError } from "../../../utils/error";
 import { validateCedulaService } from "../services/cedulaService";
 import { validateRNCService } from "../services/rncService";
 import { registerClienteEmpresaService, registerClientePersonaService } from "../services/clienteService";
@@ -11,7 +11,10 @@ import { Usuario } from "../../../types/User";
 import { getUsuarioByEmail } from "../../Usuarios/repositories/usuarioRepository";
 import { sendWithNodemailer, sendWithSES } from "../services/emailSenderService";
 import { consumeUsedMagicLink, magicConsumeService, magicLinkService } from "../services/magicLinkService";
-import MagicLinkRepository from "../repositories/magicLinkRepository";
+import MagicLinkRepository, { MagicLinkI } from "../repositories/magicLinkRepository";
+import * as clienteRepository from "../../Usuarios/repositories/clienteRepository";
+
+// TODO: Todo esto se puede refactorizar
 
 export interface SignUpData {
     correo: string;
@@ -72,8 +75,9 @@ export const signUpEmpresaCtrl: RequestHandler = async (req, res, next) => {
         for (const key of Object.keys(data) as Array<keyof SignUpEmpresaData>) {
             const value = data[key];
   
-            if (!value || typeof value != 'string')
+            if (!value || typeof value != 'string') {
                 throw new BadRequestError("Formato invalido");
+            }
         }
 
         if (!validateRNCService(data.rnc))
@@ -82,10 +86,14 @@ export const signUpEmpresaCtrl: RequestHandler = async (req, res, next) => {
         const user = await registerClienteEmpresaService(data, municipio_slug);
 
         res.status(201).json({ message: "Usuario creado exitosamente", user });
-    } catch (e) {
+    } catch (e: any) {
+        if (e.code === '23514') {
+            next(new BadRequestError("Tipo de empresa invalido"));
+            return;
+        }
+
         next(e);
     }
-
 }
 
 export const signInCtrl: RequestHandler = async (req, res, next) => {
@@ -163,7 +171,7 @@ export const refreshCtrl: RequestHandler = async (req, res, next) => {
     try {
         const token = req.cookies.refreshToken;
         if (!token) 
-            throw new UnauthorizedError();
+            throw new TokenError();
 
         let payload: TokenPayload;
         try {
@@ -201,8 +209,10 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
     try {
         const { user_id, email } = req.body;
         const { id, session_id } = await magicLinkService(user_id);
+        const formType = req.query.formType;  // 'login' or 'signup'
 
-        const magicLink = `${config.origin}/auth/magic-link/${id}`;
+        const x = formType === 'signup' ? 's' : 'l'; 
+        const magicLink = `${config.origin}/auth/magic-link/${x}${id}`;
 
         const sendEmail =
             process.env.NODE_ENV === "production" ? sendWithSES : sendWithNodemailer;
@@ -229,15 +239,18 @@ export const consumeMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         const consumed = req.query.consumed;
         const id = req.params.id;
 
-        let user: Usuario | null = null;
-
-        if (!consumed) user = await magicConsumeService(id);
-        else user = await consumeUsedMagicLink(id);
+        let data: MagicLinkI;
+        if (!consumed) data = await magicConsumeService(id);
+        else data = await consumeUsedMagicLink(id);
 
         const token = req.cookies.session_id;
         const isSessionValid = MagicLinkRepository.isSessionValid(id, token);
+
         if (!token || !isSessionValid) 
             throw new UnauthorizedError("NO_SESSION");
+
+        const user = await clienteRepository.setClienteVerificacion(data.user_id);
+        if (!user) throw new NotFoundError();
 
         const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo});
         const refreshToken = generateRefreshToken({ id: user.id, tipo_usuario: user.tipo });
@@ -277,7 +290,7 @@ export const getSessionCtrl: RequestHandler = async (req, res, next) => {
     try {
         const id = req.params.id;
         const magicLink = await MagicLinkRepository.getNotExpired(id);
-        if (!magicLink) throw new NotFoundError("Este usuario esta creado y no necesita verificacion");
+        if (!magicLink) throw new NotFoundError("Link expirado, inicie sesion de nuevo");
 
         res
             .cookie("session_id", magicLink.session_id, {

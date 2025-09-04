@@ -37,6 +37,12 @@ export class UnauthorizedError extends AppError {
     }
 }
 
+export class TokenError extends AppError {
+    constructor(message = "Token inválido o expirado") {
+        super(message, 401);
+    }
+}
+
 export class ForbiddenError extends AppError {
     constructor(message = "Acceso denegado") {
         super(message, 403);
