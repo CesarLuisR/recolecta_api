@@ -1,5 +1,6 @@
 import { pool } from ".";
 
+// TODO: Arreglar las consultas aqui
 export async function cleanExpiredRefreshTokens() {
     try {
         const query = `

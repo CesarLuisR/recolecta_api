@@ -116,14 +116,11 @@ CREATE TABLE Contenedores (
     ubicacion VARCHAR(255),
     estado BOOLEAN DEFAULT TRUE,
     visibilidad BOOLEAN,
-    capacidad VARCHAR(50) CHECK(capacidad IN ('pequeño, mediano, grande')),
+    capacidad VARCHAR(50) CHECK(capacidad IN ('pequeño', 'mediano', 'grande')),
     ultima_recoleccion TIMESTAMP,
     proxima_recoleccion TIMESTAMP,
     municipio_id INT REFERENCES Municipios(id) ON DELETE CASCADE
 );
-
-INSERT INTO Contenedores (codigo, lat, lng, ubicacion, estado, visibilidad, capacidad, ultima_recoleccion, proxima_recoleccion, municipio_id)
-VALUES
 
 CREATE TABLE Garajes (
     id SERIAL PRIMARY KEY,
@@ -133,6 +130,9 @@ CREATE TABLE Garajes (
     lng DECIMAL(10,7) NOT NULL,
     municipio_id INT REFERENCES Municipios(id) ON DELETE CASCADE
 );
+
+INSERT INTO Garajes(nombre, direccion, lat, lng, municipio_id)
+VALUES ('primer garaje', 'por ahi', 18.452347767776985, -69.31081295013429, 1);
 
 CREATE TABLE Recibos (
     id SERIAL PRIMARY KEY,
@@ -151,7 +151,7 @@ CREATE TABLE Recibos (
 
 CREATE TABLE Servicios (
     id SERIAL PRIMARY KEY,
-    capacidad VARCHAR(10) NOT NULL CHECK(capacidad IN ('pequeño, mediano, grande'))
+    capacidad VARCHAR(10) NOT NULL CHECK(capacidad IN ('pequeño, mediano, grande')),
     lat DECIMAL(10,7) NOT NULL,
     lng DECIMAL(10,7) NOT NULL,
     calle VARCHAR(100),
@@ -178,9 +178,30 @@ CREATE TABLE Rutas (
     nombre VARCHAR(100),
     es_publica BOOLEAN DEFAULT FALSE,
     activa BOOLEAN DEFAULT TRUE,
-    ruta_osrm TEXT,
+    ruta_ors JSONB,
     garaje_id INT REFERENCES Garajes(id),
     municipio_id INT REFERENCES Municipios(id) ON DELETE CASCADE
+);
+
+CREATE TABLE Ruta_Parada (
+    id SERIAL PRIMARY KEY,
+    ruta_id INT NOT NULL REFERENCES Rutas(id) ON DELETE CASCADE,
+    tipo_parada VARCHAR(20) NOT NULL CHECK (tipo_parada IN ('contenedor','servicio','garaje','guia')),
+    contenedor_id INT REFERENCES Contenedores(id) ON DELETE CASCADE,
+    servicio_id INT REFERENCES Servicios(id) ON DELETE CASCADE,
+    garaje_id INT REFERENCES Garajes(id),
+    lat DECIMAL(10,7),  -- para los puntos guía
+    lng DECIMAL(10,7),  -- para los puntos guía
+    orden INT NOT NULL,
+    tiempo_estimado INTERVAL,
+    distancia_desde_inicio DECIMAL(10,2),
+    UNIQUE(ruta_id, orden),
+    CONSTRAINT chk_tipo_parada CHECK (
+        (tipo_parada = 'contenedor' AND contenedor_id IS NOT NULL AND servicio_id IS NULL AND garaje_id IS NULL AND lat IS NULL AND lng IS NULL) OR
+        (tipo_parada = 'servicio'   AND servicio_id IS NOT NULL   AND contenedor_id IS NULL AND garaje_id IS NULL AND lat IS NULL AND lng IS NULL) OR
+        (tipo_parada = 'garaje'     AND garaje_id IS NOT NULL      AND contenedor_id IS NULL AND servicio_id IS NULL AND lat IS NULL AND lng IS NULL) OR
+        (tipo_parada = 'guia'       AND lat IS NOT NULL           AND lng IS NOT NULL AND contenedor_id IS NULL AND servicio_id IS NULL AND garaje_id IS NULL)
+    )
 );
 
 CREATE TABLE Ruta_Dia (
@@ -190,24 +211,6 @@ CREATE TABLE Ruta_Dia (
     hora_inicio TIME NOT NULL,
     hora_fin TIME NOT NULL,
     UNIQUE(ruta_id, dia_id)
-);
-
-CREATE TABLE Ruta_Parada (
-    id SERIAL PRIMARY KEY,
-    ruta_id INT NOT NULL REFERENCES Rutas(id) ON DELETE CASCADE,
-    tipo_parada VARCHAR(20) NOT NULL CHECK (tipo_parada IN ('contenedor','servicio')),
-    contenedor_id INT REFERENCES Contenedores(id) ON DELETE CASCADE,
-    servicio_id INT REFERENCES Servicios(id) ON DELETE CASCADE,
-    garaje_id INT REFERENCES Garajes(id),
-    orden INT NOT NULL,
-    tiempo_estimado INTERVAL,
-    distancia_desde_inicio DECIMAL(10,2),
-    UNIQUE(ruta_id, orden),
-    CONSTRAINT chk_tipo_parada CHECK (
-        (tipo_parada = 'contenedor' AND contenedor_id IS NOT NULL AND servicio_id IS NULL AND garaje_id IS NULL) OR
-        (tipo_parada = 'servicio' AND servicio_id IS NOT NULL AND contenedor_id IS NULL AND garaje_id IS NULL) OR
-        (tipo_parada = 'garaje' AND garaje_id IS NOT NULL AND contenedor_id IS NULL AND servicio_id IS NULL)
-    )
 );
 
 CREATE TABLE Tipos_Vehiculos (
