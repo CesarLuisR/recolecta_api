@@ -1,4 +1,4 @@
-import { Usuario } from "../../../types/User";
+import { Usuario } from "../../../types/Usuario";
 import { NotFoundError, UnauthorizedError } from "../../../utils/error";
 import MagicLinkRepository, { MagicLinkI } from "../repositories/magicLinkRepository";
 
@@ -6,7 +6,7 @@ export const magicLinkService = async (user_id: number): Promise<MagicLinkI> => 
     const magicData: MagicLinkI | null = await MagicLinkRepository.create(user_id);
 
     if (!magicData)
-            throw new NotFoundError();
+        throw new NotFoundError();
 
     return magicData;
 };

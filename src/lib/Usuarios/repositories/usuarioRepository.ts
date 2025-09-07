@@ -1,5 +1,5 @@
 import { pool } from "../../../database"
-import { Cliente, Usuario } from "../../../types/User";
+import { Cliente, Usuario } from "../../../types/Usuario";
 import * as usuarioQueries from "./usuarioModel";
 
 export const getUsuarioByEmail = async (email: string) => {
@@ -23,7 +23,7 @@ export const findById = async (id: number) => {
     const data = await pool.query(
         usuarioQueries.getUsuarioByIdModel,
         [id]
-    );  
+    );
     if (data.rowCount === 0) return null;
 
     const user: Usuario = data.rows[0];

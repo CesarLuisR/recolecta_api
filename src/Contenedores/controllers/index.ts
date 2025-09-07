@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { BadRequestError, NotFoundError } from "../../utils/error";
 import * as ContenedorRepository from "../repositories/repository";
-import { Contenedor } from "../../types/contenedor";
+import { Contenedor } from "../../types/Contenedor";
 import AuthRepository from "../../User/repository/authRepository";
 
 /**

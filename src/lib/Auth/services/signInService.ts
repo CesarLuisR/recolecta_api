@@ -1,4 +1,4 @@
-import { Usuario } from "../../../types/User";
+import { Usuario } from "../../../types/Usuario";
 import { TradicionalSignIn } from "../controllers/clienteCtrl";
 import * as usuarioRepository from "../../Usuarios/repositories/usuarioRepository";
 import { NotFoundError, UnauthorizedError } from "../../../utils/error";

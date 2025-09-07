@@ -1,5 +1,5 @@
 import { pool } from "../../../database";
-import { Empresa, Persona, Usuario } from "../../../types/User";
+import { Empresa, Persona, Usuario } from "../../../types/Usuario";
 import { SignUpEmpresaData, SignUpPersonaData } from "../../Auth/controllers/clienteCtrl";
 import * as clienteQueries from "./clienteModel";
 

@@ -1,6 +1,6 @@
 import { pool } from "../../database";
 import * as contenedorQueries from "./model";
-import { Contenedor } from "../../types/contenedor";
+import { Contenedor } from "../../types/Contenedor";
 import { NotFoundError } from "../../utils/error";
 
 export const createContenedorRepo = async (

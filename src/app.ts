@@ -11,6 +11,7 @@ import authClienteRoutes from "./lib/Auth/routes/clienteRoutes";
 import usuarioRoutes from "./lib/Usuarios/routes/usuarioRoutes";
 import contenedorRoutes from "./lib/Contenedores/routes/contenedorRoutes";
 import rutasRoutes from "./lib/Rutas/routes";
+import garajeRoutes from "./lib/Garajes/routes/garajeRoutes";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/v1/auth", authClienteRoutes);
 app.use("/api/v1/usuarios", usuarioRoutes);
 app.use("/api/v1/contenedores", contenedorRoutes);
 app.use("/api/v1/rutas", rutasRoutes);
+app.use("/api/v1/garajes", garajeRoutes);
 
 app.use(errorHandler);
 

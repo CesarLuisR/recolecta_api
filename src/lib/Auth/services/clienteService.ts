@@ -5,7 +5,7 @@ import { emailVerificationService } from "./emailVerificationService";
 import { hashPassword } from "../../../utils/hash";
 import * as clienteRepository from "../../Usuarios/repositories/clienteRepository";
 import { Municipio } from "../../../types/Municipio";
-import { Empresa, Persona } from "../../../types/User";
+import { Empresa, Persona } from "../../../types/Usuario";
 
 export const registerClientePersonaService = async (data: SignUpPersonaData, municipio_slug: string): Promise<Persona> => {
     try {

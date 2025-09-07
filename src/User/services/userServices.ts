@@ -1,4 +1,4 @@
-import { User } from "../../types/User";
+import { User } from "../../types/Usuario";
 import { NotFoundError } from "../../utils/error";
 import UserRepository from "../repository/userRepository";
 

@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { pool } from "../../database";
 import * as authQueries from "./authModel"
 import { NotFoundError } from "../../utils/error";
-import { User } from "../../types/User";
+import { User } from "../../types/Usuario";
 import { SignUpData } from "../../lib/Auth/controllers/clienteCtrl";
 
 // CONTEXT: Designed this way thinking in a future hexagonal arch
@@ -31,7 +31,7 @@ export default class AuthRepository {
             ]
         );
 
-        if (raw.rowCount === 0) 
+        if (raw.rowCount === 0)
             return null;
 
         return raw.rows[0];

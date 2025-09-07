@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { pool } from "../../database";
 import * as userQueries from "./userModel";
-import { User } from "../../types/User";
+import { User } from "../../types/Usuario";
 import { NotFoundError } from "../../utils/error";
 import { SignUpData } from "../../types/auth";
 import { UserCredentials } from "../services/userServices";
@@ -38,9 +38,9 @@ export default class UserRepository {
         return user;
     }
 
-    static async getUser(credentials: UserCredentials): Promise<User | null>{
+    static async getUser(credentials: UserCredentials): Promise<User | null> {
         const data = await pool.query(
-            userQueries.getUser, 
+            userQueries.getUser,
             [credentials.nombre, credentials.apellido, credentials.cedula, credentials.email]
         );
 

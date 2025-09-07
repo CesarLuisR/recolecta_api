@@ -1,6 +1,6 @@
 import { SignUpData, SignUpPersonaData } from "../../lib/Auth/controllers/clienteCtrl";
 import { emailVerificationService } from "../../lib/Auth/services/emailVerificationService";
-import { Persona, User } from "../../types/User";
+import { Persona, User } from "../../types/Usuario";
 import { Conflict, NotFoundError, UnauthorizedError } from "../../utils/error";
 import { hashPassword } from "../../utils/hash";
 import AuthRepository from "../repository/authRepository";
@@ -20,7 +20,7 @@ export const registerUserService = async (data: SignUpData, municipio_slug: stri
         if (!user) throw new NotFoundError("Usuario no encontrado");
 
         return user;
-    } catch(e: any) {
+    } catch (e: any) {
         console.error("Error en el register service", e);
 
         // En caso de duplicate key (cedula)
@@ -35,7 +35,7 @@ export const magicLinkService = async (user_id: number): Promise<MagicLinkI> => 
     const magicData: MagicLinkI | null = await MagicLinkRepository.create(user_id);
 
     if (!magicData)
-            throw new NotFoundError();
+        throw new NotFoundError();
 
     return magicData;
 };
@@ -87,7 +87,7 @@ export const verifyMagicLinkService = async (id: string): Promise<userExistenceI
 // TODO: no se necesita password tampoco aqui 
 export const loginUserService = async (data: LogInData): Promise<User> => {
     const user = await UserRepository.getUserByEmail(data.email);
-    if (!user) 
+    if (!user)
         throw new NotFoundError();
 
     // const validPassword = await comparePassword(data.password, user.password_hash);

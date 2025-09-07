@@ -7,7 +7,7 @@ import { signInService } from "../services/signInService";
 import { generateAccessToken, generateRefreshToken, TokenPayload, verifyRefreshToken } from "../../../utils/token";
 import TokenRepository from "../repositories/tokenRepository";
 import config from "../../../config";
-import { Usuario } from "../../../types/User";
+import { Usuario } from "../../../types/Usuario";
 import { getUsuarioByEmail } from "../../Usuarios/repositories/usuarioRepository";
 import { sendWithNodemailer, sendWithSES } from "../services/emailSenderService";
 import { consumeUsedMagicLink, magicConsumeService, magicLinkService } from "../services/magicLinkService";
@@ -49,7 +49,7 @@ export const signUpPersonaCtrl: RequestHandler = async (req, res, next) => {
 
         for (const key of Object.keys(data) as Array<keyof SignUpPersonaData>) {
             const value = data[key];
-  
+
             if (key === 'fecha_nacimiento' && value instanceof Date) continue;
 
             if (!value || typeof value != 'string')
@@ -74,7 +74,7 @@ export const signUpEmpresaCtrl: RequestHandler = async (req, res, next) => {
 
         for (const key of Object.keys(data) as Array<keyof SignUpEmpresaData>) {
             const value = data[key];
-  
+
             if (!value || typeof value != 'string') {
                 throw new BadRequestError("Formato invalido");
             }
@@ -113,7 +113,7 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
             user = await getUsuarioByEmail(correo);
             if (!user) throw new NotFoundError("Usuario no encontrado");
         }
-        
+
         const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo });
         const refreshToken = generateRefreshToken({ id: user.id, tipo_usuario: user.tipo });
 
@@ -122,10 +122,10 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
         res
             .cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure: config.ENV === "production", 
+                secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                path: "/", 
+                path: "/",
             })
             .status(201)
             .json({ message: "Usuario logeado correctamente", user, accessToken });
@@ -159,10 +159,10 @@ export const signOutCtrl: RequestHandler = async (req, res, next) => {
                 httpOnly: true,
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
-                path: "/", 
+                path: "/",
             })
             .sendStatus(204);
-    } catch(e) {
+    } catch (e) {
         next(e);
     }
 }
@@ -170,7 +170,7 @@ export const signOutCtrl: RequestHandler = async (req, res, next) => {
 export const refreshCtrl: RequestHandler = async (req, res, next) => {
     try {
         const token = req.cookies.refreshToken;
-        if (!token) 
+        if (!token)
             throw new TokenError();
 
         let payload: TokenPayload;
@@ -196,11 +196,11 @@ export const refreshCtrl: RequestHandler = async (req, res, next) => {
                 secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                path: "/", 
+                path: "/",
             })
             .status(200)
             .json({ accessToken })
-    } catch(e) {
+    } catch (e) {
         next(e);
     }
 }
@@ -211,7 +211,7 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         const { id, session_id } = await magicLinkService(user_id);
         const formType = req.query.formType;  // 'login' or 'signup'
 
-        const x = formType === 'signup' ? 's' : 'l'; 
+        const x = formType === 'signup' ? 's' : 'l';
         const magicLink = `${config.origin}/auth/magic-link/${x}${id}`;
 
         const sendEmail =
@@ -220,16 +220,16 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         await sendEmail(email, "Tu enlace mágico", `<p>Haz clic <a href="${magicLink}">aquí</a> para entrar. Este enlace expira en 10 minutos.</p>`);
 
         res.cookie("session_id", session_id, {
-                httpOnly: true,
-                secure: config.ENV === "production", 
-                sameSite: config.ENV === "production" ? "none" : "lax",
-                maxAge: 10 * 60 * 1000, // 10 mins
-                path: "/", 
-            })
+            httpOnly: true,
+            secure: config.ENV === "production",
+            sameSite: config.ENV === "production" ? "none" : "lax",
+            maxAge: 10 * 60 * 1000, // 10 mins
+            path: "/",
+        })
             .status(201)
             .json({ message: "Mensaje enviado correctamente" });
 
-    } catch(e) {
+    } catch (e) {
         next(e);
     }
 }
@@ -246,13 +246,13 @@ export const consumeMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         const token = req.cookies.session_id;
         const isSessionValid = MagicLinkRepository.isSessionValid(id, token);
 
-        if (!token || !isSessionValid) 
+        if (!token || !isSessionValid)
             throw new UnauthorizedError("NO_SESSION");
 
         const user = await clienteRepository.setClienteVerificacion(data.user_id);
         if (!user) throw new NotFoundError();
 
-        const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo});
+        const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo });
         const refreshToken = generateRefreshToken({ id: user.id, tipo_usuario: user.tipo });
 
         TokenRepository.saveRefreshToken(user.id, refreshToken);
@@ -260,14 +260,14 @@ export const consumeMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         res
             .cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure: config.ENV === "production", 
+                secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                path: "/", 
+                path: "/",
             })
             .status(201)
-            .json({ message: "Usuario logeado correctamente" , user, accessToken });
-    } catch(e) {
+            .json({ message: "Usuario logeado correctamente", user, accessToken });
+    } catch (e) {
         next(e);
     }
 }
@@ -281,7 +281,7 @@ export const validateMagicLinkCtrl: RequestHandler = async (req, res, next) => {
             throw new NotFoundError("Link no encontrado");
 
         res.status(200).json({ exists: true, verified: true });
-    } catch(e) {
+    } catch (e) {
         next(e);
     }
 }
@@ -295,14 +295,14 @@ export const getSessionCtrl: RequestHandler = async (req, res, next) => {
         res
             .cookie("session_id", magicLink.session_id, {
                 httpOnly: true,
-                secure: config.ENV === "production", 
+                secure: config.ENV === "production",
                 sameSite: config.ENV === "production" ? "none" : "lax",
                 maxAge: 10 * 60 * 1000, // 10 mins
-                path: "/", 
+                path: "/",
             })
             .status(201)
             .json({ message: "Session establecida correctamente" });
-    } catch(e) {
+    } catch (e) {
         next(e);
     }
 }
