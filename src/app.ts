@@ -12,6 +12,7 @@ import usuarioRoutes from "./lib/Usuarios/routes/usuarioRoutes";
 import contenedorRoutes from "./lib/Contenedores/routes/contenedorRoutes";
 import rutasRoutes from "./lib/Rutas/routes";
 import garajeRoutes from "./lib/Garajes/routes/garajeRoutes";
+import paradaRutasRoutes from "./lib/ParadaRuta/routes";
 
 const app = express();
 
@@ -29,17 +30,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 
-// routes
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/user", userRoutes);
-// app.use("/api/v1/containers", containersRoutes);
 
-// new routes
+// routes
 app.use("/api/v1/auth", authClienteRoutes);
 app.use("/api/v1/usuarios", usuarioRoutes);
 app.use("/api/v1/contenedores", contenedorRoutes);
 app.use("/api/v1/rutas", rutasRoutes);
 app.use("/api/v1/garajes", garajeRoutes);
+app.use("/api/v1/ruta-parada", paradaRutasRoutes);
 
 app.use(errorHandler);
 

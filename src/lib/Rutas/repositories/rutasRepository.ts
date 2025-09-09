@@ -20,14 +20,14 @@ export const RutaRepository = {
     },
 
     async create(data: any) {
-        const { codigo, nombre, es_publica = false, activa = true, ruta_osrm, garaje_id, municipio_id } = data;
+        const { codigo, nombre, es_publica = false, activa = true, ruta_ors, garaje_id, municipio_id } = data;
 
         const query = `
             INSERT INTO Rutas (codigo, nombre, es_publica, activa, ruta_ors, garaje_id, municipio_id)
             VALUES ($1,$2,$3,$4,$5,$6,$7)
             RETURNING *
         `;
-        const values = [codigo, nombre, es_publica, activa, ruta_osrm || null, garaje_id || null, municipio_id];
+        const values = [codigo, nombre, es_publica, activa, ruta_ors || null, garaje_id || null, municipio_id];
         const { rows } = await pool.query(query, values);
         return rows[0];
     },
