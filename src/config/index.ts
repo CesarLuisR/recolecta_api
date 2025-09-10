@@ -4,6 +4,7 @@ interface AppConfig {
     jwtRefreshSecret: string;
     origin: string;
     ENV: string;
+    ORSApiKey: string;
     SMTP: {
         host: string;
         user: string;
@@ -23,10 +24,11 @@ interface AppConfig {
 
 const config: AppConfig = {
     port: parseInt(process.env.PORT || '5000'),
-    jwtAccessSecret: process.env.JWT_ACCESS_SECRET || 'fallback_secret',
-    jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "otrosecreto",
+    jwtAccessSecret: process.env.JWT_ACCESS_SECRET || '',
+    jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "",
     origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
     ENV: process.env.NODE_ENV || 'production',
+    ORSApiKey: process.env.ORSApiKey || "",
     SMTP: {
         host: process.env.SMTP_HOST || "",
         user: process.env.SMTP_USER || "",
@@ -35,8 +37,8 @@ const config: AppConfig = {
     db: {
         user: process.env.DB_USER || 'postgres',
         host: process.env.DB_HOST || 'localhost',
-        database: process.env.DB_NAME || 'my_drive',
-        password: process.env.DB_PASS || 'cesarluis2005',
+        database: process.env.DB_NAME || '',
+        password: process.env.DB_PASS || '',
         port: parseInt(process.env.DB_PORT || '5432'),
     },
     external: {

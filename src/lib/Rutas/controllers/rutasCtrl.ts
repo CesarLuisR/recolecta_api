@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { BadRequestError, NotFoundError } from "../../../utils/error";
 import { RutaRepository } from "../repositories/rutasRepository";
+import { createRutaDataValidator, CreateRutaWithParadaI, createRutaWithParadasService } from "../services/rutasService";
 
 export const getPublicByMunicipioCtrl: RequestHandler = async (req, res, next) => {
     try {
@@ -30,13 +31,17 @@ export const getByIdCtrl: RequestHandler = async (req, res, next) => {
 
 export const createRutaCtrl: RequestHandler = async (req, res, next) => {
     try {
-        const data = req.body;
-        if (!data.codigo || !data.nombre || !data.municipio_id) {
-            throw new BadRequestError("Datos incompletos");
-        }
+        const data: CreateRutaWithParadaI = req.body;
+        // if (!data.rutaData.codigo || !data.nombre || !data.municipio_id) {
+        //     throw new BadRequestError("Datos incompletos");
+        // }
 
-        const ruta = await RutaRepository.create(data);
-        res.status(201).json({ message: "Ruta creada exitosamente", ruta });
+        // const ruta = await RutaRepository.create(data);
+
+        console.log(data);
+        createRutaDataValidator(data);
+        await createRutaWithParadasService(data);
+        res.status(201).json({ message: "Ruta creada exitosamente", /*ruta*/ });
     } catch (error) {
         next(error);
     }

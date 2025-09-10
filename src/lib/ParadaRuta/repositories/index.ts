@@ -1,17 +1,20 @@
 import { pool } from "../../../database"; 
+import { RutaParada } from "../../../types/RutaParada";
+import { CreateParadaData } from "../../Rutas/services/rutasService";
 
 export class RutaParadaRepository {
     static async getAll() {
         const { rows } = await pool.query("SELECT * FROM ruta_parada ORDER BY id ASC");
-        return rows;
+        return rows as RutaParada[];
     }
 
     static async findById(id: number) {
         const { rows } = await pool.query("SELECT * FROM ruta_parada WHERE id = $1", [id]);
-        return rows[0] || null;
+        return rows[0] as RutaParada || null;
     }
 
-    static async create(data: any) {
+    // TODO: Esto es necesario que devuelva la rutaParada????
+    static async create(data: CreateParadaData): Promise<RutaParada> {
         const {
             ruta_id,
             tipo_parada,
@@ -23,7 +26,7 @@ export class RutaParadaRepository {
             orden,
             tiempo_estimado,
             distancia_desde_inicio,
-        } = data;
+        }: CreateParadaData = data;
 
         const { rows } = await pool.query(
             `INSERT INTO ruta_parada 
@@ -44,10 +47,10 @@ export class RutaParadaRepository {
             ]
         );
 
-        return rows[0];
+        return rows[0] as RutaParada;
     }
 
-    static async update(id: number, data: any) {
+    static async update(id: number, data: RutaParada): Promise<RutaParada> {
         const {
             ruta_id,
             tipo_parada,
@@ -59,7 +62,7 @@ export class RutaParadaRepository {
             orden,
             tiempo_estimado,
             distancia_desde_inicio,
-        } = data;
+        }: RutaParada = data;
 
         const { rows } = await pool.query(
             `UPDATE ruta_parada SET 
@@ -90,7 +93,7 @@ export class RutaParadaRepository {
             ]
         );
 
-        return rows[0] || null;
+        return rows[0] as RutaParada || null;
     }
 
     static async delete(id: number) {
@@ -104,7 +107,7 @@ export class RutaParadaRepository {
             "SELECT * FROM ruta_parada WHERE ruta_id = $1 ORDER BY orden ASC",
             [rutaId]
         );
-        return rows;
+        return rows as RutaParada[];
     }
 
     static async getByRutaAndTipo(rutaId: number, tipo: string) {
@@ -112,6 +115,6 @@ export class RutaParadaRepository {
             "SELECT * FROM ruta_parada WHERE ruta_id = $1 AND tipo_parada = $2 ORDER BY orden ASC",
             [rutaId, tipo]
         );
-        return rows;
+        return rows as RutaParada[];
     }
 }

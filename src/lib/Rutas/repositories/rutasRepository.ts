@@ -1,4 +1,6 @@
 import { pool } from "../../../database"; // conexión a PostgreSQL
+import { Ruta } from "../../../types/Ruta";
+import { CreateRutaData } from "../services/rutasService";
 
 export const RutaRepository = {
     async getPublicByMunicipio(municipio_slug: string) {
@@ -11,16 +13,16 @@ export const RutaRepository = {
             WHERE m.slug = $1 AND r.es_publica = TRUE
         `;
         const { rows } = await pool.query(query, [municipio_slug]);
-        return rows;
+        return rows as Ruta[];
     },
 
     async findById(id: number) {
         const { rows } = await pool.query(`SELECT * FROM Rutas WHERE id = $1`, [id]);
-        return rows[0] || null;
+        return rows[0] as Ruta || null;
     },
 
-    async create(data: any) {
-        const { codigo, nombre, es_publica = false, activa = true, ruta_ors, garaje_id, municipio_id } = data;
+    async create(data: CreateRutaData): Promise<Ruta> {
+        const { codigo, nombre, es_publica = false, activa = true, ruta_ors, garaje_id, municipio_id }: CreateRutaData = data;
 
         const query = `
             INSERT INTO Rutas (codigo, nombre, es_publica, activa, ruta_ors, garaje_id, municipio_id)
@@ -29,10 +31,11 @@ export const RutaRepository = {
         `;
         const values = [codigo, nombre, es_publica, activa, ruta_ors || null, garaje_id || null, municipio_id];
         const { rows } = await pool.query(query, values);
-        return rows[0];
+
+        return rows[0] as Ruta;
     },
 
-    async update(id: number, data: any) {
+    async update(id: number, data: Ruta) {
         const fields = Object.keys(data);
         const values = Object.values(data);
 
@@ -42,7 +45,7 @@ export const RutaRepository = {
         const query = `UPDATE Rutas SET ${setQuery} WHERE id = $${fields.length + 1} RETURNING *`;
 
         const { rows } = await pool.query(query, [...values, id]);
-        return rows[0] || null;
+        return rows[0] as Ruta || null;
     },
 
     async delete(id: number) {
@@ -60,7 +63,7 @@ export const RutaRepository = {
             RETURNING *
         `;
         const { rows } = await pool.query(query, [id]);
-        return rows[0] || null;
+        return rows[0] as Ruta || null;
     },
 
     async toggleVisibilidad(id: number) {
@@ -71,10 +74,11 @@ export const RutaRepository = {
             RETURNING *
         `;
         const { rows } = await pool.query(query, [id]);
-        return rows[0] || null;
+        return rows[0] as Ruta || null;
     },
 
     async filterByMunicipio(municipio_slug: string, filtros: any) {
+        // TODO: Hay que revisar este codigo
         let query = `
             SELECT r.* 
             FROM Rutas r
@@ -98,6 +102,6 @@ export const RutaRepository = {
         }
 
         const { rows } = await pool.query(query, values);
-        return rows;
+        return rows as Ruta[];
     }
 };

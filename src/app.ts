@@ -13,6 +13,7 @@ import contenedorRoutes from "./lib/Contenedores/routes/contenedorRoutes";
 import rutasRoutes from "./lib/Rutas/routes";
 import garajeRoutes from "./lib/Garajes/routes/garajeRoutes";
 import paradaRutasRoutes from "./lib/ParadaRuta/routes";
+import ORSApiRoutes from "./lib/ORSApi/routes";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/v1/contenedores", contenedorRoutes);
 app.use("/api/v1/rutas", rutasRoutes);
 app.use("/api/v1/garajes", garajeRoutes);
 app.use("/api/v1/ruta-parada", paradaRutasRoutes);
+app.use("/api/v1/ors", ORSApiRoutes);
 
 app.use(errorHandler);
 
