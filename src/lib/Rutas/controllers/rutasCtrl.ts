@@ -32,13 +32,7 @@ export const getByIdCtrl: RequestHandler = async (req, res, next) => {
 export const createRutaCtrl: RequestHandler = async (req, res, next) => {
     try {
         const data: CreateRutaWithParadaI = req.body;
-        // if (!data.rutaData.codigo || !data.nombre || !data.municipio_id) {
-        //     throw new BadRequestError("Datos incompletos");
-        // }
 
-        // const ruta = await RutaRepository.create(data);
-
-        console.log(data);
         createRutaDataValidator(data);
         await createRutaWithParadasService(data);
         res.status(201).json({ message: "Ruta creada exitosamente", /*ruta*/ });

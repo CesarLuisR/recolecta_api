@@ -92,16 +92,19 @@ export const createRutaWithParadasService = async (data: CreateRutaWithParadaI) 
     try {
         await client.query("BEGIN");
 
-        const ruta: Ruta = await RutaRepository.create(data.rutaData);
+        const ruta: Ruta = await RutaRepository.create(data.rutaData, client);
 
+        let count = 1;
         for (const parada of data.paradaList) {
             parada.ruta_id = ruta.id;
-            await RutaParadaRepository.create(parada);
+            parada.orden = count++;
+            await RutaParadaRepository.create(parada, client);
         }
 
         await client.query("COMMIT");
     } catch (e) {
         await client.query("ROLLBACK");
+        throw e;
     } finally {
         client.release();
     }

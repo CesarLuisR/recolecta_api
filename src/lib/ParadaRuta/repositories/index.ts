@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import { pool } from "../../../database"; 
 import { RutaParada } from "../../../types/RutaParada";
 import { CreateParadaData } from "../../Rutas/services/rutasService";
@@ -14,7 +15,7 @@ export class RutaParadaRepository {
     }
 
     // TODO: Esto es necesario que devuelva la rutaParada????
-    static async create(data: CreateParadaData): Promise<RutaParada> {
+    static async create(data: CreateParadaData, client?: PoolClient): Promise<RutaParada> {
         const {
             ruta_id,
             tipo_parada,
@@ -28,7 +29,9 @@ export class RutaParadaRepository {
             distancia_desde_inicio,
         }: CreateParadaData = data;
 
-        const { rows } = await pool.query(
+        const q = client || pool;
+
+        const { rows } = await q.query(
             `INSERT INTO ruta_parada 
             (ruta_id, tipo_parada, contenedor_id, servicio_id, garaje_id, lat, lng, orden, tiempo_estimado, distancia_desde_inicio)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)

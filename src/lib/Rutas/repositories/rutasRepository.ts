@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import { pool } from "../../../database"; // conexión a PostgreSQL
 import { Ruta } from "../../../types/Ruta";
 import { CreateRutaData } from "../services/rutasService";
@@ -21,8 +22,10 @@ export const RutaRepository = {
         return rows[0] as Ruta || null;
     },
 
-    async create(data: CreateRutaData): Promise<Ruta> {
+    async create(data: CreateRutaData, client?: PoolClient): Promise<Ruta> {
         const { codigo, nombre, es_publica = false, activa = true, ruta_ors, garaje_id, municipio_id }: CreateRutaData = data;
+
+        const q = client || pool;
 
         const query = `
             INSERT INTO Rutas (codigo, nombre, es_publica, activa, ruta_ors, garaje_id, municipio_id)
@@ -30,7 +33,7 @@ export const RutaRepository = {
             RETURNING *
         `;
         const values = [codigo, nombre, es_publica, activa, ruta_ors || null, garaje_id || null, municipio_id];
-        const { rows } = await pool.query(query, values);
+        const { rows } = await q.query(query, values);
 
         return rows[0] as Ruta;
     },
