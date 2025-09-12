@@ -38,17 +38,18 @@ export const RutaRepository = {
         return rows[0] as Ruta;
     },
 
-    async update(id: number, data: Ruta) {
+    async update(id: number, data: CreateRutaData, client?: PoolClient) {
         const fields = Object.keys(data);
         const values = Object.values(data);
+        const q = client || pool;
 
         if (fields.length === 0) return null;
 
         const setQuery = fields.map((field, i) => `${field} = $${i + 1}`).join(", ");
         const query = `UPDATE Rutas SET ${setQuery} WHERE id = $${fields.length + 1} RETURNING *`;
 
-        const { rows } = await pool.query(query, [...values, id]);
-        return rows[0] as Ruta || null;
+        const { rows } = await q.query(query, [...values, id]);
+        return rows[0] as Ruta;
     },
 
     async delete(id: number) {

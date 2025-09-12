@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { BadRequestError, NotFoundError } from "../../../utils/error";
 import { RutaRepository } from "../repositories/rutasRepository";
-import { createRutaDataValidator, CreateRutaWithParadaI, createRutaWithParadasService } from "../services/rutasService";
+import { createRutaDataValidator, CreateRutaWithParadaI, createRutaWithParadasService, updateRutaWithParadasService } from "../services/rutasService";
 
 export const getPublicByMunicipioCtrl: RequestHandler = async (req, res, next) => {
     try {
@@ -44,12 +44,11 @@ export const createRutaCtrl: RequestHandler = async (req, res, next) => {
 export const updateRutaCtrl: RequestHandler = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const data = req.body;
+        const data: CreateRutaWithParadaI = req.body;
 
-        const ruta = await RutaRepository.update(Number(id), data);
-        if (!ruta) throw new NotFoundError("Ruta no encontrada");
-
-        res.status(200).json({ message: "Ruta actualizada", ruta });
+        createRutaDataValidator(data);
+        await updateRutaWithParadasService(data, Number(id));
+        res.status(200).json({ message: "Ruta actualizada" });
     } catch (error) {
         next(error);
     }

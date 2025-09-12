@@ -105,6 +105,12 @@ export class RutaParadaRepository {
         if (rowCount) return rowCount > 0;
     }
 
+    static async deleteByRutaId(rutaId: number, client?: PoolClient) {
+        const q = client || pool;
+        const { rowCount } = await q.query("DELETE FROM ruta_parada WHERE ruta_id = $1", [rutaId]);
+        if (rowCount) return rowCount > 0;
+    }
+
     static async getByRuta(rutaId: number) {
         const { rows } = await pool.query(
             "SELECT * FROM ruta_parada WHERE ruta_id = $1 ORDER BY orden ASC",

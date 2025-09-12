@@ -109,3 +109,32 @@ export const createRutaWithParadasService = async (data: CreateRutaWithParadaI) 
         client.release();
     }
 }
+
+export const updateRutaWithParadasService = async (data: CreateRutaWithParadaI, id: number) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const ruta: Ruta | null = await RutaRepository.update(id, data.rutaData, client);
+
+        if (!ruta)
+            throw new Error();
+
+        await RutaParadaRepository.deleteByRutaId(ruta.id);
+
+        let count = 1;
+        for (const parada of data.paradaList) {
+            parada.ruta_id = ruta.id;
+            parada.orden = count++;
+            await RutaParadaRepository.create(parada, client);
+        }
+
+        await client.query("COMMIT");
+    } catch (e) {
+        await client.query("ROLLBACK");
+        throw e;
+    } finally {
+        client.release();
+    }
+}
