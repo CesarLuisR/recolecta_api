@@ -68,7 +68,7 @@ export const checkEmailExistsCtrl: RequestHandler = async (req, res, next) => {
     try {
         const { email } = req.params;
         const user = await UsuarioRepository.getUsuarioByEmail(email);
-        res.status(200).json({ exists: !!user });
+        res.status(200).json({ exists: !!user, user });
     } catch (error) {
         next(error);
     }

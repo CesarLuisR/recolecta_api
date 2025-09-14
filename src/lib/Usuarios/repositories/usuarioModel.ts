@@ -5,6 +5,13 @@ export const getUsuarioByEmailModel = `
     WHERE correo = $1
 `;
 
+export const getUsuarioWithHashByEmailModel = `
+    SELECT 
+        id, correo, tipo, activo, municipio_id, creado_en, password_hash
+    FROM Usuarios
+    WHERE correo = $1
+`;
+
 export const getUsuariosModel = `
     SELECT 
         id, correo, tipo, activo, municipio_id, creado_en

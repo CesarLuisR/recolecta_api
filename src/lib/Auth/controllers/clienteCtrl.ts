@@ -100,6 +100,7 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
     try {
         let user: Usuario | null = null;
 
+        console.log(req.body);
         if (req.query.tipo === 'tradicional') {
             const data: TradicionalSignIn = req.body;
             if (!data.correo || !data.password)
@@ -111,7 +112,7 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
             if (!correo) throw new BadRequestError("Se necesita todos los datos");
 
             user = await getUsuarioByEmail(correo);
-            if (!user) throw new NotFoundError("Usuario no encontrado");
+            if (!user) throw new NotFoundError("Credenciales invalidas");
         }
 
         const accessToken = generateAccessToken({ id: user.id, tipo_usuario: user.tipo });

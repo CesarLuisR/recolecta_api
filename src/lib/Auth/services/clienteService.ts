@@ -47,7 +47,7 @@ export const registerClienteEmpresaService = async (data: SignUpEmpresaData, mun
     } catch (e: any) {
         console.error("Error en el register service", e);
 
-        // En caso de duplicate key (cedula)
+        // En caso de duplicate key (RNC)
         if (e.code === '23505')
             throw new Conflict("Este usuario ya esta registrado");
 

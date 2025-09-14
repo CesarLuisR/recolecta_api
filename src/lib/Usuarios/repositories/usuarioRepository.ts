@@ -14,6 +14,18 @@ export const getUsuarioByEmail = async (email: string) => {
     return user;
 }
 
+export const getUsuarioWithHashByEmail = async (email: string) => {
+    const data = await pool.query(
+        usuarioQueries.getUsuarioWithHashByEmailModel,
+        [email]
+    );
+
+    if (data.rowCount === 0) return null;
+
+    const user: Usuario = data.rows[0];
+    return user;
+}
+
 export const getUsuarios = async () => {
     const data = await pool.query(usuarioQueries.getUsuariosModel);
     return data.rows as Usuario[];
