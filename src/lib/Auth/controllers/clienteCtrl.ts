@@ -216,9 +216,10 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         const magicLink = `${config.origin}/auth/magic-link/${x}${id}`;
 
         const sendEmail =
-            process.env.NODE_ENV === "production" ? sendWithSES : sendWithNodemailer;
+            config.ENV === "production" ? sendWithSES : sendWithNodemailer;
 
-        await sendEmail(email, "Tu enlace mágico", `<p>Haz clic <a href="${magicLink}">aquí</a> para entrar. Este enlace expira en 10 minutos.</p>`);
+        if (config.ENV !== "test")
+            await sendEmail(email, "Tu enlace mágico", `<p>Haz clic <a href="${magicLink}">aquí</a> para entrar. Este enlace expira en 10 minutos.</p>`);
 
         res.cookie("session_id", session_id, {
             httpOnly: true,
@@ -226,10 +227,13 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
             sameSite: config.ENV === "production" ? "none" : "lax",
             maxAge: 10 * 60 * 1000, // 10 mins
             path: "/",
-        })
-            .status(201)
-            .json({ message: "Mensaje enviado correctamente" });
+        });
 
+        const resBody: any = { message: "Mensaje enviado correctamente" };
+        if (config.ENV === "test")
+            resBody.magicLink = magicLink;
+
+        res.status(201).json(resBody);
     } catch (e) {
         next(e);
     }
