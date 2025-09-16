@@ -230,8 +230,10 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
         });
 
         const resBody: any = { message: "Mensaje enviado correctamente" };
-        if (config.ENV === "test")
+        if (config.ENV === "test") {
+            resBody.id = id;
             resBody.magicLink = magicLink;
+        }
 
         res.status(201).json(resBody);
     } catch (e) {
