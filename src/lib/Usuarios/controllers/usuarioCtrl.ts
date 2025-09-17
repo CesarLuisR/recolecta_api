@@ -4,6 +4,8 @@ import { getClienteByUsuarioId, getClienteByUsuarioIdAndVerificado, getUsuarioBy
 import { SignUpEmpresaData, SignUpPersonaData } from "../../Auth/controllers/clienteCtrl";
 import { validateCedulaService } from "../../Auth/services/cedulaService";
 import { validateRNCService } from "../../Auth/services/rncService";
+import { emailVerificationService } from "../../Auth/services/emailVerificationService";
+import { personVerificationService } from "../services/clienteVerificationService";
 
 export const getUsuariosCtrl: RequestHandler = async (req, res, next) => {
     try {
@@ -36,7 +38,7 @@ export const getMeCtrl: RequestHandler = async (req, res, next) => {
             throw new UnauthorizedError("No user info found in request");
 
         const id = req.user.id;
-        const user = await UsuarioRepository.findById(id); 
+        const user = await UsuarioRepository.findById(id);
         res.status(200).json({ user });
     } catch (error) {
         next(error);
@@ -80,7 +82,7 @@ export const verifyUsuarioPersonaCtrl: RequestHandler = async (req, res, next) =
 
         for (const key of Object.keys(data) as Array<keyof SignUpPersonaData>) {
             const value = data[key];
-  
+
             if (key === 'fecha_nacimiento' && value instanceof Date) continue;
 
             if (!value || typeof value != 'string')
@@ -89,6 +91,8 @@ export const verifyUsuarioPersonaCtrl: RequestHandler = async (req, res, next) =
 
         if (!validateCedulaService(data.cedula))
             throw new BadRequestError("Cedula invalida");
+
+        await emailVerificationService(data.correo);
 
         const user = await getUsuarioByEmail(data.correo);
         if (!user) throw new NotFoundError("Usuario no encontrado");
@@ -104,7 +108,10 @@ export const verifyUsuarioPersonaCtrl: RequestHandler = async (req, res, next) =
     }
 }
 
-export const verifyUsuarioEmpresaCtrl : RequestHandler = async (req, res, next) => {
+// TODO: Este y el de arriba hay que hacerles un refactor completo para que trabajen con el mismo servicio
+// Email y password.
+// Hay que actualizar todo el frontend tambine.
+export const verifyUsuarioEmpresaCtrl: RequestHandler = async (req, res, next) => {
     try {
         const data: SignUpEmpresaData = req.body;
 
@@ -118,12 +125,7 @@ export const verifyUsuarioEmpresaCtrl : RequestHandler = async (req, res, next) 
         if (!validateRNCService(data.rnc))
             throw new BadRequestError("RNC invalido");
 
-        const user = await getUsuarioByEmail(data.correo);
-        if (!user) throw new NotFoundError("Usuario no encontrado");
-
-        const cliente = await getClienteByUsuarioId(user.id);
-        if (cliente && cliente.verificado)
-            throw new BadRequestError("Usuario ya verificado");
+        const user = await personVerificationService(data);
 
         res.status(201).json({ message: "Usuario encontrado exitosamente", user });
     } catch (error) {
