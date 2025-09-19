@@ -12,6 +12,14 @@ export const getUsuarioWithHashByEmailModel = `
     WHERE correo = $1
 `;
 
+export const getVerifiedUsuarioWithHashByEmailModel = `
+    SELECT 
+        u.id, u.correo, u.tipo, u.activo, u.municipio_id, u.creado_en, u.password_hash
+    FROM Usuarios u
+    JOIN Clientes c ON c.usuario_id = u.id
+    WHERE u.correo = $1 AND c.verificado = TRUE;
+`;
+
 export const getUsuariosModel = `
     SELECT 
         id, correo, tipo, activo, municipio_id, creado_en

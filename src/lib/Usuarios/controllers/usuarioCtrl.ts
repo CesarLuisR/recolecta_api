@@ -1,11 +1,8 @@
 import { RequestHandler } from "express";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../../../utils/error";
-import { getClienteByUsuarioId, getClienteByUsuarioIdAndVerificado, getUsuarioByEmail, UsuarioRepository } from "../repositories/usuarioRepository";
-import { SignUpEmpresaData, SignUpPersonaData } from "../../Auth/controllers/clienteCtrl";
-import { validateCedulaService } from "../../Auth/services/cedulaService";
-import { validateRNCService } from "../../Auth/services/rncService";
-import { emailVerificationService } from "../../Auth/services/emailVerificationService";
+import { UsuarioRepository } from "../repositories/usuarioRepository";
 import { personVerificationService } from "../services/clienteVerificationService";
+import isEmail from "validator/lib/isEmail";
 
 export const getUsuariosCtrl: RequestHandler = async (req, res, next) => {
     try {
@@ -69,6 +66,10 @@ export const getClienteByUsuarioIdCtrl: RequestHandler = async (req, res, next) 
 export const checkEmailExistsCtrl: RequestHandler = async (req, res, next) => {
     try {
         const { email } = req.params;
+
+        if (!isEmail(email)) 
+            throw new BadRequestError("Formato de email incorrecto");
+
         const user = await UsuarioRepository.getUsuarioByEmail(email);
         res.status(200).json({ exists: !!user, user });
     } catch (error) {
@@ -76,59 +77,19 @@ export const checkEmailExistsCtrl: RequestHandler = async (req, res, next) => {
     }
 }
 
-export const verifyUsuarioPersonaCtrl: RequestHandler = async (req, res, next) => {
+export const verifyUsuarioIdentityCtrl: RequestHandler = async (req, res, next) => {
     try {
-        const data: SignUpPersonaData = req.body;
+        const data: { correo: string, password: string } = req.body;
 
-        for (const key of Object.keys(data) as Array<keyof SignUpPersonaData>) {
-            const value = data[key];
-
-            if (key === 'fecha_nacimiento' && value instanceof Date) continue;
-
-            if (!value || typeof value != 'string')
-                throw new BadRequestError("Formato invalido");
-        }
-
-        if (!validateCedulaService(data.cedula))
-            throw new BadRequestError("Cedula invalida");
-
-        await emailVerificationService(data.correo);
-
-        const user = await getUsuarioByEmail(data.correo);
-        if (!user) throw new NotFoundError("Usuario no encontrado");
-
-        const cliente = await getClienteByUsuarioId(user.id);
-
-        if (cliente && cliente.verificado)
-            throw new BadRequestError("Usuario ya verificado");
-
-        res.status(201).json({ message: "Usuario encontrado exitosamente", user });
-    } catch (error) {
-        next(error);
-    }
-}
-
-// TODO: Este y el de arriba hay que hacerles un refactor completo para que trabajen con el mismo servicio
-// Email y password.
-// Hay que actualizar todo el frontend tambine.
-export const verifyUsuarioEmpresaCtrl: RequestHandler = async (req, res, next) => {
-    try {
-        const data: SignUpEmpresaData = req.body;
-
-        for (const key of Object.keys(data) as Array<keyof SignUpEmpresaData>) {
-            const value = data[key];
-
-            if (!value || typeof value != 'string')
-                throw new BadRequestError("Formato invalido");
-        }
-
-        if (!validateRNCService(data.rnc))
-            throw new BadRequestError("RNC invalido");
+        if (!data.correo || typeof data.correo !== "string")
+            throw new BadRequestError("Formato invalido");
+        if (!data.password || typeof data.password !== "string")
+            throw new BadRequestError("Formato invalido");
 
         const user = await personVerificationService(data);
 
         res.status(201).json({ message: "Usuario encontrado exitosamente", user });
-    } catch (error) {
-        next(error);
+    } catch (e) {
+        next(e);
     }
 }

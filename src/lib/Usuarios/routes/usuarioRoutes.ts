@@ -17,7 +17,6 @@ router.get("/:id/cliente", authenticateToken, usuarioCtrl.getClienteByUsuarioIdC
 // router.get("/:id/empresa", usuarioCtrl.getEmpresaByUsuarioIdCtrl);
 
 router.post("/verifyEmail/:email", usuarioCtrl.checkEmailExistsCtrl);
-router.post("/verify-persona", usuarioCtrl.verifyUsuarioPersonaCtrl);
-router.post("/verify-empresa", usuarioCtrl.verifyUsuarioEmpresaCtrl);
+router.post("/verify-usuario", usuarioCtrl.verifyUsuarioIdentityCtrl);
 
 export default router;

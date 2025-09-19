@@ -8,7 +8,7 @@ import { generateAccessToken, generateRefreshToken, TokenPayload, verifyRefreshT
 import TokenRepository from "../repositories/tokenRepository";
 import config from "../../../config";
 import { Usuario } from "../../../types/Usuario";
-import { getUsuarioByEmail } from "../../Usuarios/repositories/usuarioRepository";
+import { getVerifiedUsuarioWithHashByEmail } from "../../Usuarios/repositories/usuarioRepository";
 import { sendWithNodemailer, sendWithSES } from "../services/emailSenderService";
 import { consumeUsedMagicLink, magicConsumeService, magicLinkService } from "../services/magicLinkService";
 import MagicLinkRepository, { MagicLinkI } from "../repositories/magicLinkRepository";
@@ -100,7 +100,6 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
     try {
         let user: Usuario | null = null;
 
-        console.log(req.body);
         if (req.query.tipo === 'tradicional') {
             const data: TradicionalSignIn = req.body;
             if (!data.correo || !data.password)
@@ -111,7 +110,7 @@ export const signInCtrl: RequestHandler = async (req, res, next) => {
             const { correo } = req.body;
             if (!correo) throw new BadRequestError("Se necesita todos los datos");
 
-            user = await getUsuarioByEmail(correo);
+            user = await getVerifiedUsuarioWithHashByEmail(correo);
             if (!user) throw new NotFoundError("Credenciales invalidas");
         }
 
@@ -209,6 +208,7 @@ export const refreshCtrl: RequestHandler = async (req, res, next) => {
 export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
     try {
         const { user_id, email } = req.body;
+        // Como sabemos si el email es real aqui???
         const { id, session_id } = await magicLinkService(user_id);
         const formType = req.query.formType;  // 'login' or 'signup'
 
@@ -241,6 +241,7 @@ export const sendMagicLinkCtrl: RequestHandler = async (req, res, next) => {
     }
 }
 
+// TODO: este codigo es un desastre, tengo que enstudiarlo y refactorizarlo bien
 export const consumeMagicLinkCtrl: RequestHandler = async (req, res, next) => {
     try {
         const consumed = req.query.consumed;
